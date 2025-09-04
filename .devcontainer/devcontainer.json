@@ -1,0 +1,59 @@
+{
+  "name": "victor2wy/rstudio",
+  "image": "victor2wy/rstudio",
+  "containerEnv": {
+    "RENV_PATHS_CACHE": "/renv/cache"
+  },
+  "features": {
+    "ghcr.io/rocker-org/devcontainer-features/renv-cache:0": {},
+    "ghcr.io/nils-geistmann/devcontainers-features/zsh:0": {},
+    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "latest",
+      "pipx": true
+    },
+    "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+      "installVscDebugger": true,
+      "installRadian": true,
+      "installDevTools": true,
+      "vscodeRSupport": "full"
+    },
+    "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // R Extensions
+        "rdebugger.r-debugger",
+        "reditorsupport.r",
+        // Documentation Extensions
+        "quarto.quarto",
+        "purocean.drawio-preview",
+        "redhat.vscode-yaml",
+        "yzhang.markdown-all-in-one",
+        // Docker Supporting Extensions
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        // Python Extensions
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "mhutchie.git-graph"
+      ],
+      "settings": {
+        "r.lsp.enabled": true,
+        "r.rterm.linux": "/usr/local/bin/radian"
+      }
+    }
+  },
+  "postCreateCommand": "R -q -e 'renv::restore()'; R -q -e 'renv::install()'",
+  "overrideCommand": false, // lets rstudio-server auto start
+  // map 8787 (rstudio in container) to host 8889
+  // modify the 8888 to whatever you want
+  "appPort": [
+    "8889:8787"
+  ],
+  "forwardPorts": [
+    "8889:8787",
+    4200 // quarto preview
+  ]
+}
