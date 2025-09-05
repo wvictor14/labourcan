@@ -2,3 +2,4 @@
 ^renv\.lock$
 ^template-r-dev\.Rproj$
 ^\.Rproj\.user$
+^\.devcontainer$
