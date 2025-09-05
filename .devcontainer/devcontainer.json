@@ -1,26 +1,22 @@
 {
   "name": "victor2wy/rstudio",
-  "image": "victor2wy/rstudio",
+  "image": "victor2wy/rstudio:latest",
   "containerEnv": {
-    "RENV_PATHS_CACHE": "/renv/cache"
+    "PASSWORD": "password"
   },
   "features": {
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
       "packages": [
         "libcurl4-openssl-dev",
-        "libgit2-dev"
+        "libgit2-dev",
+        "libharfbuzz-dev",
+        "libfribidi-dev"
       ]
     },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
     },
     "ghcr.io/rocker-org/devcontainer-features/renv-cache:0": {},
-    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
-      "plugins": [
-        "docker",
-        "colorize"
-      ]
-    },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "latest",
       "pipx": true
@@ -34,7 +30,17 @@
     "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2.12.3": {},
     "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
-    "ghcr.io/devcontainers-extra/features/ruff:1": {}
+    "ghcr.io/devcontainers-extra/features/ruff:1": {},
+    "ghcr.io/devcontainers/features/common-utils": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "configureZshAsDefaultShell": true
+    },
+    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
+      "plugins": "zsh-autosuggestions zsh-syntax-highlighting",
+      "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git"
+    }
   },
   "customizations": {
     "vscode": {
@@ -44,12 +50,6 @@
         "reditorsupport.r",
         // Documentation Extensions
         "quarto.quarto",
-        "purocean.drawio-preview",
-        "redhat.vscode-yaml",
-        "yzhang.markdown-all-in-one",
-        // Docker Supporting Extensions
-        "ms-azuretools.vscode-docker",
-        "ms-vscode-remote.remote-containers",
         // Python Extensions
         "ms-python.python",
         "ms-toolsai.jupyter",
@@ -57,6 +57,7 @@
         "charliermarsh.ruff"
       ],
       "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
         "r.lsp.enabled": true,
         "r.rterm.linux": "/usr/local/bin/radian",
         "r.bracketedPaste": true,
