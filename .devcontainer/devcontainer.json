@@ -5,20 +5,36 @@
     "RENV_PATHS_CACHE": "/renv/cache"
   },
   "features": {
+    "ghcr.io/devcontainers-extra/features/apt-packages:1": {
+      "packages": [
+        "libcurl4-openssl-dev",
+        "libgit2-dev"
+      ]
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    },
     "ghcr.io/rocker-org/devcontainer-features/renv-cache:0": {},
-    "ghcr.io/nils-geistmann/devcontainers-features/zsh:0": {},
-    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {},
+    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
+      "plugins": [
+        "docker",
+        "colorize"
+      ]
+    },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "latest",
       "pipx": true
     },
-    "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+    "ghcr.io/rocker-org/devcontainer-features/r-apt:0": {
       "installVscDebugger": true,
-      "installRadian": true,
       "installDevTools": true,
-      "vscodeRSupport": "full"
+      "vscodeRSupport": "full",
+      "installRadian": true
     },
-    "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {}
+    "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2.12.3": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
+    "ghcr.io/devcontainers-extra/features/ruff:1": {}
   },
   "customizations": {
     "vscode": {
@@ -37,15 +53,22 @@
         // Python Extensions
         "ms-python.python",
         "ms-toolsai.jupyter",
-        "mhutchie.git-graph"
+        "mhutchie.git-graph",
+        "charliermarsh.ruff"
       ],
       "settings": {
         "r.lsp.enabled": true,
-        "r.rterm.linux": "/usr/local/bin/radian"
+        "r.rterm.linux": "/usr/local/bin/radian",
+        "r.bracketedPaste": true,
+        "r.plot.useHttpgd": true,
+        "[r]": {
+          "editor.wordSeparators": "`~!@#%$^&*()-=+[{]}\\|;:'\",<>/?"
+        }
       }
     }
   },
-  "postCreateCommand": "R -q -e 'renv::restore()'; R -q -e 'renv::install()'",
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  "postStartCommand": "bash .devcontainer/postStart.sh",
   "overrideCommand": false, // lets rstudio-server auto start
   // map 8787 (rstudio in container) to host 8889
   // modify the 8888 to whatever you want
@@ -54,6 +77,9 @@
   ],
   "forwardPorts": [
     "8889:8787",
+    9000, // httpgd
     4200 // quarto preview
-  ]
+  ],
+  "shutdownAction": "none",
+  "remoteUser": "rstudio"
 }
