@@ -5,7 +5,7 @@ format:
     toc: true
 jupyter: python3
 editor: 
-  render-on-save: true
+  render-on-save: false
 ---
 
 This script is just to explore data to decide how to:
@@ -58,8 +58,8 @@ labour.group_by('YEAR').len().sort('YEAR')
 ```
 
 ```{python}
-labour_filt = labour.filter(pl.col('YEAR') >= 2005)
-labour_filt.group_by('YEAR').len().sort('YEAR')
+labour = labour.filter(pl.col('YEAR') >= 2005)
+labour.group_by('YEAR').len().sort('YEAR')
 ```
 
 ## Explore columns
@@ -67,14 +67,13 @@ labour_filt.group_by('YEAR').len().sort('YEAR')
 Look at unique values across each column
 
 ```{python}
-labour_filt.group_by('Labour force characteristics').len()
-
+labour.group_by('Labour force characteristics').len()
 ```
 
 
 ```{python}
 def unique_values(col):
-    GT(labour_filt.select(col).unique()).show()
+    GT(labour.select(col).unique()).show()
 
 
 unique_values('Labour force characteristics')
@@ -99,4 +98,22 @@ unique_values('Age group')
 
 ```{python}
 unique_values('UOM')
+```
+
+## Filter further
+
+```{python}
+labour_filtered = (
+    labour
+    .filter(
+        pl.col('Labour force characteristics') == 'Employment',
+        ~pl.col('North American Industry Classification System (NAICS)').is_in(
+            ['Total, all industries', 'Unclassified industries']
+        ),
+        pl.col('GEO') == 'Canada',
+        pl.col('Gender') == 'Total - Gender',
+        pl.col('Age group') == '25 to 54 years',
+        pl.col('UOM') == 'Persons in thousands'
+    )
+)
 ```
