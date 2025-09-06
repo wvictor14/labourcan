@@ -12,6 +12,7 @@ editor:
 
 ```{python}
 import polars as pl
+import polars.selectors as cs
 from pyprojroot import here
 from great_tables import GT, md, html
 ```
@@ -20,7 +21,11 @@ from great_tables import GT, md, html
 ```{python}
 FILE = here() / "data" / "14100022.csv"
 labour = (
-    pl.read_csv(FILE)
+
+    # lazy read in and filter / drop columns
+    pl.scan_csv(FILE)
+    .drop(
+        ['UOM_ID', 'DGUID', 'SCALAR_FACTOR', 'SCALAR_ID', 'VECTOR', 'COORDINATE', 'STATUS', 'SYMBOL', 'TERMINATED', 'DECIMALS'])
     .filter(
         pl.col('Labour force characteristics') == 'Employment',
         ~pl.col('North American Industry Classification System (NAICS)').is_in(
@@ -31,7 +36,59 @@ labour = (
         pl.col('Age group') == '25 to 54 years',
         pl.col('UOM') == 'Persons in thousands'
     )
+    .drop([
+        'Labour force characteristics',
+        'GEO',
+        'Gender',
+        'Age group',
+        'UOM'
+    ])
+    .with_columns(pl.col('VALUE').cast(pl.Float64))
+
+    # define Date columns
+    .with_columns(
+        pl.col('REF_DATE').str.extract(r'^(\d+)').cast(pl.Int32).alias('YEAR'),
+        pl.col('REF_DATE').str.extract(r'(\d+)$').cast(pl.Int32).alias('MONTH')
+    )
+    .with_columns(
+        pl.date(pl.col('YEAR'), pl.col('MONTH'), 1).alias('DATE_YMD')
+    )
+    .sort(['YEAR', 'MONTH'])
+    .collect()
 )
 labour.glimpse()
 ```
 
+## Process data
+
+Need to make this variable: **signed rank in change in # of jobs**
+
+Per month
+
+Check that each year has 12 months:
+
+```{python}
+GT(labour.select('YEAR', 'MONTH').unique().group_by('YEAR').len())
+```
+
+
+```{python}
+labour_processed = (
+    labour
+    .filter(pl.col('YEAR') == 2025)
+    .rename({"North American Industry Classification System (NAICS)": "Industry"})
+
+    # if we sort acesnding by time, then lag value is the month before
+    .sort(['Industry', 'YEAR', 'MONTH'])
+    .with_columns(LAGGED_VALUE=pl.col("VALUE").shift(1).over('Industry'))
+
+    # compute percent difference
+    .with_columns((pl.col("VALUE") - pl.col("LAGGED_VALUE")).alias("DIFF"))
+    .with_columns((pl.col("DIFF") / pl.col("LAGGED_VALUE")).alias("PDIFF"))
+    .select(
+        pl.col('Industry'),
+        pl.col('YEAR'),
+        pl.col('MONTH'), cs.matches('VALUE'), cs.matches('DIFF')
+    )
+)
+```
