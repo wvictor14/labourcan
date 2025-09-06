@@ -10,6 +10,8 @@ editor:
 
 # Setup
 
+## Libraries
+
 ```{python}
 import polars as pl
 import polars.selectors as cs
@@ -17,6 +19,9 @@ from pyprojroot import here
 from great_tables import GT, md, html
 ```
 
+## Data
+
+Load data lazily because it is 2.5 Gb
 
 ```{python}
 FILE = here() / "data" / "14100022.csv"
@@ -59,9 +64,9 @@ labour = (
 labour.glimpse()
 ```
 
-## Process data
+# Process data
 
-Need to make this variable: **signed rank in change in # of jobs**
+For our graphic, we need to make this variable: **signed rank in change in # of jobs**
 
 Per month
 
@@ -71,6 +76,9 @@ Check that each year has 12 months:
 GT(labour.select('YEAR', 'MONTH').unique().group_by('YEAR').len())
 ```
 
+## % Change per month
+
+First, compute % change from previous month
 
 ```{python}
 labour_processed = (
@@ -91,4 +99,27 @@ labour_processed = (
         pl.col('MONTH'), cs.matches('VALUE'), cs.matches('DIFF')
     )
 )
+labour_processed
 ```
+
+## Signed rank
+
+Now we can compute **Signed Asceending Rank of industry by % change**
+
+*Signed* rank means that it is effectively computed over negative and positive %change separtely
+
+e.g.
+
+[-0.01, -0.02, 0.01, 0.02] = 
+[-1, -2, 1, 2]
+
+
+```{python}
+labour_processed = (
+    labour_processed
+    .with_columns(sign=pl.col('PDIFF').sign())
+    .with_columns(signed_rank=(pl.col('sign')*pl.col('PDIFF').rank()).over(['Industry', 'sign']))
+)
+labour_processed
+```
+
