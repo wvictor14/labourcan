@@ -7,3 +7,31 @@ jupyter: python3
 editor: 
   render-on-save: true
 ---
+
+# Setup
+
+```{python}
+import polars as pl
+from pyprojroot import here
+from great_tables import GT, md, html
+```
+
+
+```{python}
+FILE = here() / "data" / "14100022.csv"
+labour = (
+    pl.read_csv(FILE)
+    .filter(
+        pl.col('Labour force characteristics') == 'Employment',
+        ~pl.col('North American Industry Classification System (NAICS)').is_in(
+            ['Total, all industries', 'Unclassified industries']
+        ),
+        pl.col('GEO') == 'Canada',
+        pl.col('Gender') == 'Total - Gender',
+        pl.col('Age group') == '25 to 54 years',
+        pl.col('UOM') == 'Persons in thousands'
+    )
+)
+labour.glimpse()
+```
+
