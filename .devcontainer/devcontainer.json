@@ -54,7 +54,8 @@
         "ms-python.python",
         "ms-toolsai.jupyter",
         "mhutchie.git-graph",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "ms-toolsai.datawrangle"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
@@ -74,10 +75,10 @@
   // map 8787 (rstudio in container) to host 8889
   // modify the 8888 to whatever you want
   "appPort": [
-    "8889:8787"
+    //"8889:8787"
   ],
   "forwardPorts": [
-    "8889:8787",
+    //"8889:8787",
     9000, // httpgd
     4200 // quarto preview
   ],
