@@ -47,3 +47,4 @@ Thumbs.db # Windows specific
 .Rprofile.d/
 .renv/
 renv/
+data/14100022.csv
