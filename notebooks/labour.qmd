@@ -17,6 +17,7 @@ import polars as pl
 import polars.selectors as cs
 from pyprojroot import here
 from great_tables import GT, md, html
+from plotnine import *
 ```
 
 ## Data
@@ -83,7 +84,7 @@ First, compute % change from previous month
 ```{python}
 labour_processed = (
     labour
-    .filter(pl.col('YEAR') == 2025)
+    .filter(pl.col('YEAR') >= 2020)
     .rename({"North American Industry Classification System (NAICS)": "Industry"})
 
     # if we sort acesnding by time, then lag value is the month before
@@ -95,9 +96,12 @@ labour_processed = (
     .with_columns((pl.col("DIFF") / pl.col("LAGGED_VALUE")).alias("PDIFF"))
     .select(
         pl.col('Industry'),
+        pl.col('DATE_YMD'),
         pl.col('YEAR'),
         pl.col('MONTH'), cs.matches('VALUE'), cs.matches('DIFF')
     )
+    
+    .sort(['Industry', 'YEAR', 'MONTH', 'PDIFF'])
 )
 labour_processed
 ```
@@ -114,12 +118,74 @@ e.g.
 [-1, -2, 1, 2]
 
 
+new solution
+
+```{python}
+def centered_rank_expr(col):
+    """
+    Expression version of your function - this is the recommended approach
+    as it integrates better with Polars' lazy evaluation and optimization
+    """
+    return (
+        pl.when(col < 0)
+        .then(col.rank(method="ordinal", descending=True) * -1)
+        .when(col == 0)
+        .then(pl.lit(0))
+        .when(col > 0)
+        .then(col.rank(method="ordinal"))
+        .otherwise(pl.lit(None))
+    ).over(col < 0)
+
+
+test_series = (
+    labour_processed
+    .with_columns(pl.col('PDIFF').round(decimals=4))
+    .filter(pl.col('YEAR') == 2025, pl.col('MONTH') == 1)
+    .select(pl.col('PDIFF'))
+    .sample(n=10, seed=1)
+    .select('PDIFF')
+)
+
+test_series.with_columns(centered_rank_expr(
+    pl.col('PDIFF')).alias('rank')).sort('PDIFF')
+```
+
 ```{python}
 labour_processed = (
     labour_processed
     .with_columns(sign=pl.col('PDIFF').sign())
-    .with_columns(signed_rank=(pl.col('sign')*pl.col('PDIFF').rank()).over(['Industry', 'sign']))
+    .with_columns(
+        signed_rank=(
+            pl.col('sign')*pl.col('PDIFF').rank()).over(['YEAR', 'MONTH', 'sign']),
+        centered_rank=centered_rank(pl.col('PDIFF')).over(['YEAR', 'MONTH'])
+    )
 )
 labour_processed
 ```
 
+
+```{python}
+s  # check 1 year 1 month
+(
+    labour_processed
+    .with_columns(pl.col('PDIFF').round(decimals=4))
+    .filter(pl.col('YEAR') == 2025, pl.col('MONTH') == 1)
+    .sort(['YEAR', 'MONTH', 'PDIFF'])
+    .select(['PDIFF', 'signed_rank'])
+)
+```
+
+```{python}
+(
+    ggplot(labour_processed, aes(x="DATE_YMD", y="signed_rank", color="PDIFF")) +
+    geom_point(shape='s')
+)
+```
+
+
+# Exploratory
+
+
+```{python}
+
+```
