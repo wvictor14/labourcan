@@ -118,23 +118,27 @@ e.g.
 [-1, -2, 1, 2]
 
 
-new solution
+Define centered_rank_expr function
 
 ```{python}
 def centered_rank_expr(col):
     """
-    Expression version of your function - this is the recommended approach
-    as it integrates better with Polars' lazy evaluation and optimization
+    - Largest negative value gets rank -1
+    - Smallest positive value gets rank +1
+    - Zero gets rank 0
     """
     return (
         pl.when(col < 0)
-        .then(col.rank(method="ordinal", descending=True) * -1)
+        .then(
+            # minus the total # of -ve values
+            (col.rank(method="ordinal", descending=True) * -1) + (col > 0).sum()
+        )
         .when(col == 0)
         .then(pl.lit(0))
         .when(col > 0)
-        .then(col.rank(method="ordinal"))
+        .then(col.rank(method="ordinal") - (col < 0).sum())
         .otherwise(pl.lit(None))
-    ).over(col < 0)
+    )
 
 
 test_series = (
@@ -157,7 +161,8 @@ labour_processed = (
     .with_columns(
         signed_rank=(
             pl.col('sign')*pl.col('PDIFF').rank()).over(['YEAR', 'MONTH', 'sign']),
-        centered_rank=centered_rank(pl.col('PDIFF')).over(['YEAR', 'MONTH'])
+        centered_rank=centered_rank_expr(
+            pl.col('PDIFF')).over(['YEAR', 'MONTH'])
     )
 )
 labour_processed
@@ -165,19 +170,19 @@ labour_processed
 
 
 ```{python}
-s  # check 1 year 1 month
+# check 1 year 1 month
 (
     labour_processed
     .with_columns(pl.col('PDIFF').round(decimals=4))
     .filter(pl.col('YEAR') == 2025, pl.col('MONTH') == 1)
     .sort(['YEAR', 'MONTH', 'PDIFF'])
-    .select(['PDIFF', 'signed_rank'])
+    .select(['PDIFF', 'signed_rank', 'centered_rank'])
 )
 ```
 
 ```{python}
 (
-    ggplot(labour_processed, aes(x="DATE_YMD", y="signed_rank", color="PDIFF")) +
+    ggplot(labour_processed, aes(x="DATE_YMD", y="centered_rank", color="PDIFF")) +
     geom_point(shape='s')
 )
 ```
