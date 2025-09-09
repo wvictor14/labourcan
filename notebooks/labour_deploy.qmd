@@ -1,0 +1,55 @@
+---
+title: "Exploring Labour data"
+format: 
+  html:
+    toc: true
+jupyter: python3
+editor: 
+  render-on-save: true
+---
+
+# Setup
+
+## Parameters
+
+```{python}
+from pyprojroot import here
+```
+```{python}
+# | tags: [parameters]
+LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
+```
+
+## Libraries
+
+```{python}
+import polars as pl
+import polars.selectors as cs
+from mizani.bounds import squish
+from pyprojroot import here
+from great_tables import GT, md, html
+from plotnine import *
+from labourcan.data_processing import read_labourcan
+```
+
+## Read data
+
+[read_labourcan](../py/labourcan/data_processing.py) returns a polars dataframe with columns:
+
+- Unnecessary metadata columns removed
+- Filtered to seasonally adjusted estimates only
+- Additional `YEAR`, `MONTH`, and `DATE_YMD` columns extracted from `REF_DATE`
+- Sorted chronologically by year and month
+
+
+```{python}
+labour = read_labourcan(LABOUR_DATA_FILE)
+#   .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
+#        pl.col("GEO") == "Canada",
+#      ~pl.col('North American Industry Classification System (NAICS)').is_in([
+# 'Total employed, all industries',
+# 'Goods-producing sector',
+# 'Services-producing sector'
+# ]),
+labour.glimpse()
+```
