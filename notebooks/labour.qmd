@@ -10,11 +10,21 @@ editor:
 
 # Setup
 
+## Parameters
+
+```{python}
+from pyprojroot import here
+```
+```{python}
+# | tags: [parameters]
+LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
+```
 ## Libraries
 
 ```{python}
 import polars as pl
 import polars.selectors as cs
+from mizani.bounds import squish
 from pyprojroot import here
 from great_tables import GT, md, html
 from plotnine import *
@@ -25,10 +35,9 @@ from plotnine import *
 Load data lazily because it is 2.5 Gb
 
 ```{python}
-FILE = here() / "data" / "14100022.csv"
 labour = (
     # lazy read in and filter / drop columns
-    pl.scan_csv(FILE)
+    pl.scan_csv(LABOUR_DATA_FILE)
     .drop(
         [
             "UOM_ID",
@@ -51,15 +60,22 @@ labour = (
         # pl.col("North American Industry Classification System (NAICS)")
         # == "Total, all industries",
         pl.col("GEO") == "Canada",
-        pl.col("Gender") == "Total - Gender",
-        pl.col("Age group") == "15 years and over",
+        # pl.col("Gender") == "Total - Gender",
+        # pl.col("Age group") == "15 years and over",
+        pl.col('Statistics') == 'Estimate',
+
+        # filter out sectors that are grouped
+        ~pl.col('North American Industry Classification System (NAICS)').is_in([
+            # 'Total employed, all industries',
+            # 'Goods-producing sector',
+            # 'Services-producing sector'
+        ]),
+        pl.col('Data type') == 'Seasonally adjusted'
     )
     .drop(
         [
             # 'Labour force characteristics',
             "GEO",
-            "Gender",
-            "Age group",
             # "UOM",
         ]
     )
@@ -116,7 +132,7 @@ labour_processed = (
     .with_columns(
         LAGGED_VALUE=pl.col("VALUE")
         .shift(1)
-        .over(["Industry", "Labour force characteristics"])
+        .over(["Industry"])
     )
     # compute percent difference
     .with_columns((pl.col("VALUE") - pl.col("LAGGED_VALUE")).alias("DIFF"))
@@ -168,11 +184,12 @@ def centered_rank_expr(col):
 
 
 test_series = (
-    labour_processed.filter(pl.col("Labour force characteristics") == "Employment")
+    # .filter(pl.col("Labour force characteristics") == "Employment")
+    labour_processed
     .with_columns(pl.col("PDIFF").round(decimals=4))
     .filter(pl.col("YEAR") == 2025, pl.col("MONTH") == 1)
     .select(pl.col("PDIFF"))
-    .sample(n=5, seed=1)
+    .sample(n=3, seed=1)
     .select("PDIFF")
 )
 
@@ -187,7 +204,7 @@ Apply to data
 ```{python}
 labour_processed = labour_processed.with_columns(
     centered_rank_across_industry=centered_rank_expr(pl.col("PDIFF")).over(
-        ["Labour force characteristics", "YEAR", "MONTH"]
+        ["YEAR", "MONTH"]
     )
 )
 labour_processed
@@ -199,9 +216,9 @@ labour_processed
 (
     labour_processed
     .with_columns(pl.col("PDIFF").round(decimals=4))
-    .filter(pl.col("YEAR") == 2025, pl.col("MONTH") == 1)
+    .filter(pl.col("YEAR") == 2025)
     .sort(["YEAR", "MONTH", "PDIFF"])
-    .select(["PDIFF", cs.matches("rank")])
+    .select(["YEAR", "MONTH", "PDIFF", cs.matches("rank")])
 )
 ```
 
@@ -210,35 +227,77 @@ labour_processed
     ggplot(
         (
             labour_processed.filter(
-                pl.col("Labour force characteristics") == "Labour force",
-                pl.col("YEAR") >= 2023,
+                pl.col("YEAR") >= 2000,
                 pl.col("YEAR") <= 2025
             )
         ), aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"))
     + geom_point(shape="s")
     + theme_tufte()
-    + theme(figure_size=(10, 8)) 
-    
-    #+ scale_color_gradient2(low="#ff0000ff", high="#0000dbff", midpoint=0)
+    + theme(figure_size=(10, 4), axis_text_x=element_text(angle=90))
+
+    + scale_color_gradient2(
+        limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish)
 )
 ```
 
+TRy with ordinal
+```{python}
+plot_data = labour_processed.filter(
+    pl.col("YEAR") >= 2008,
+    pl.col("YEAR") <= 2025
+).drop_nulls(
+    ['centered_rank_across_industry']
+)
+order = (
+    plot_data.select('centered_rank_across_industry').unique().sort(
+        'centered_rank_across_industry')
+    .to_series()
+    .cast(pl.Utf8)
+    .to_list()
+)
+
+plot_data = (
+    plot_data.with_columns(
+        pl.col('centered_rank_across_industry').cast(
+            pl.Utf8).cast(pl.Enum(categories=order))
+    )
+)
+
+(
+    ggplot(plot_data, aes(x="DATE_YMD",
+           y="centered_rank_across_industry", fill="PDIFF"))
+    + geom_tile()
+    + theme_tufte()
+    + theme(
+      figure_size=(10, 10), 
+      aspect_ratio=0.25,
+      axis_text_x=element_text(angle=90)
+      )
+      +coord_equal() 
+    + scale_fill_gradient2(
+        limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish)
+
+)
+```
 
 # Exploratory
 
 ```{python}
+# | eval: false
 (
     ggplot(
         (
             labour_processed.filter(
-                pl.col('Industry') == 'Total, all industries',
-                pl.col("Labour force characteristics") == "Unemployment rate"
+                pl.col("YEAR") >= 2008,
+                pl.col("YEAR") <= 2025,
+                pl.col('Industry') == 'Total employed, all industries'
             )
         ),
-        aes(x="DATE_YMD", y="VALUE", color="Labour force characteristics"),
+        aes(x="DATE_YMD", y="VALUE", color="Industry"),
     )
-    + geom_point()
+    # + geom_point()
     + geom_line()
-    + theme(figure_size=(6, 4))
+    + theme_tufte()
+    + theme(figure_size=(6, 4), legend_position='top')
 )
 ```
