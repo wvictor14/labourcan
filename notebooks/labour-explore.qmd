@@ -23,7 +23,7 @@ from great_tables import GT, md, html
 
 
 ```{python}
-FILE = here() / "data" / "14100022.csv"
+FILE = here() / "data" / "14100355.csv"
 labour = pl.read_csv(FILE)
 labour.glimpse()
 ```
