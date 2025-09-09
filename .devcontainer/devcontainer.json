@@ -6,12 +6,7 @@
   },
   "features": {
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
-      "packages": [
-        "libcurl4-openssl-dev",
-        "libgit2-dev",
-        "libharfbuzz-dev",
-        "libfribidi-dev"
-      ]
+      "packages": "libcurl4-openssl-dev,libgit2-dev,libharfbuzz-dev,libfribidi-dev,libfreetype6-dev,libpng-dev,libtiff5-dev,libjpeg-dev,libwebp-dev"
     },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
@@ -55,7 +50,7 @@
         "ms-toolsai.jupyter",
         "mhutchie.git-graph",
         "charliermarsh.ruff",
-        "ms-toolsai.datawrangle"
+        "ms-toolsai.datawrangler"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
