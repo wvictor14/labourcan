@@ -19,6 +19,7 @@ from pyprojroot import here
 # | tags: [parameters]
 LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
 ```
+
 ## Libraries
 
 ```{python}
@@ -28,82 +29,31 @@ from mizani.bounds import squish
 from pyprojroot import here
 from great_tables import GT, md, html
 from plotnine import *
-from labourcan.data_processing import helloworld
+from labourcan.data_processing import read_labourcan
 ```
 
-## Data
+## Read data
 
-Load data lazily because it is 2.5 Gb
+[read_labourcan](../py/labourcan/data_processing.py) returns a polars dataframe with columns:
+
+- Unnecessary metadata columns removed
+- Filtered to seasonally adjusted estimates only
+- Additional `YEAR`, `MONTH`, and `DATE_YMD` columns extracted from `REF_DATE`
+- Sorted chronologically by year and month
+
 
 ```{python}
-labour = (
-    # lazy read in and filter / drop columns
-    pl.scan_csv(LABOUR_DATA_FILE)
-    .drop(
-        [
-            "UOM_ID",
-            "DGUID",
-            "SCALAR_FACTOR",
-            "SCALAR_ID",
-            "VECTOR",
-            "COORDINATE",
-            "STATUS",
-            "SYMBOL",
-            "TERMINATED",
-            "DECIMALS",
-        ]
-    )
-    .filter(
-        # pl.col('Labour force characteristics') == 'Employment',
-        # ~pl.col('North American Industry Classification System (NAICS)').is_in(
-        #     ['Total, all industries', 'Unclassified industries']
-        # ),
-        # pl.col("North American Industry Classification System (NAICS)")
-        # == "Total, all industries",
-        pl.col("GEO") == "Canada",
-        # pl.col("Gender") == "Total - Gender",
-        # pl.col("Age group") == "15 years and over",
-        pl.col('Statistics') == 'Estimate',
-
-        # filter out sectors that are grouped
-        ~pl.col('North American Industry Classification System (NAICS)').is_in([
-            # 'Total employed, all industries',
-            # 'Goods-producing sector',
-            # 'Services-producing sector'
-        ]),
-        pl.col('Data type') == 'Seasonally adjusted'
-    )
-    .drop(
-        [
-            # 'Labour force characteristics',
-            "GEO",
-            # "UOM",
-        ]
-    )
-    .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
-    # define Date columns
-    .with_columns(
-        pl.col("REF_DATE").str.extract(r"^(\d+)").cast(pl.Int32).alias("YEAR"),
-        pl.col("REF_DATE").str.extract(
-            r"(\d+)$").cast(pl.Int32).alias("MONTH"),
-    )
-    .with_columns(pl.date(pl.col("YEAR"), pl.col("MONTH"), 1).alias("DATE_YMD"))
-    .sort(["YEAR", "MONTH"])
-    .collect()
-)
+labour = read_labourcan(LABOUR_DATA_FILE)
+#   .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
+#        pl.col("GEO") == "Canada",
+#      ~pl.col('North American Industry Classification System (NAICS)').is_in([
+# 'Total employed, all industries',
+# 'Goods-producing sector',
+# 'Services-producing sector'
+# ]),
 labour.glimpse()
 ```
 
-The main variables to vary here are
-
-- Industry (total, ...)
-- Labour Force characteristics (unemployment rate, ...)
-
-We keep all other variables constant
-
-- Location: Canada
-- Sex: M + F
-- Age: >15
 
 # Process data
 
@@ -115,8 +65,10 @@ Meaning the highest negative value (closest to 0) is rank=-1, and lowest positiv
 
 e.g.
 
+```
 [-0.01, -0.02, 0.01, 0.02] = 
 [-1, -2, 1, 2]
+```
 
 ## % Change per month
 
@@ -126,10 +78,8 @@ Do this for each industry * labour force characteristic
 
 ```{python}
 labour_processed = (
-    labour.filter(pl.col("YEAR") >= 2006)
-    .rename({"North American Industry Classification System (NAICS)": "Industry"})
     # if we sort acesnding by time, then lag value is the month before
-    .sort(["Industry", "YEAR", "MONTH"])
+    labour.sort(["Industry", "YEAR", "MONTH"])
     .with_columns(
         LAGGED_VALUE=pl.col("VALUE")
         .shift(1)
@@ -152,9 +102,9 @@ labour_processed = (
 labour_processed
 ```
 
-## Signed rank
+## Centered rank
 
-Now we can compute **Signed Asceending Rank of industry by % change**
+Now we can compute **Signed Ascending Rank of industry by % change**
 
 Define centered_rank_expr function which takes a polars series and returns an expression, meaning it can be used in a polars `with_columns` call, which is nice because it can take advantage of polars lazy-evaluation optimization.
 
