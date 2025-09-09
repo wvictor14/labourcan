@@ -27,81 +27,110 @@ Load data lazily because it is 2.5 Gb
 ```{python}
 FILE = here() / "data" / "14100022.csv"
 labour = (
-
     # lazy read in and filter / drop columns
     pl.scan_csv(FILE)
     .drop(
-        ['UOM_ID', 'DGUID', 'SCALAR_FACTOR', 'SCALAR_ID', 'VECTOR', 'COORDINATE', 'STATUS', 'SYMBOL', 'TERMINATED', 'DECIMALS'])
-    .filter(
-        pl.col('Labour force characteristics') == 'Employment',
-        ~pl.col('North American Industry Classification System (NAICS)').is_in(
-            ['Total, all industries', 'Unclassified industries']
-        ),
-        pl.col('GEO') == 'Canada',
-        pl.col('Gender') == 'Total - Gender',
-        pl.col('Age group') == '25 to 54 years',
-        pl.col('UOM') == 'Persons in thousands'
+        [
+            "UOM_ID",
+            "DGUID",
+            "SCALAR_FACTOR",
+            "SCALAR_ID",
+            "VECTOR",
+            "COORDINATE",
+            "STATUS",
+            "SYMBOL",
+            "TERMINATED",
+            "DECIMALS",
+        ]
     )
-    .drop([
-        'Labour force characteristics',
-        'GEO',
-        'Gender',
-        'Age group',
-        'UOM'
-    ])
-    .with_columns(pl.col('VALUE').cast(pl.Float64))
-
+    .filter(
+        # pl.col('Labour force characteristics') == 'Employment',
+        # ~pl.col('North American Industry Classification System (NAICS)').is_in(
+        #     ['Total, all industries', 'Unclassified industries']
+        # ),
+        # pl.col("North American Industry Classification System (NAICS)")
+        # == "Total, all industries",
+        pl.col("GEO") == "Canada",
+        pl.col("Gender") == "Total - Gender",
+        pl.col("Age group") == "15 years and over",
+    )
+    .drop(
+        [
+            # 'Labour force characteristics',
+            "GEO",
+            "Gender",
+            "Age group",
+            # "UOM",
+        ]
+    )
+    .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
     # define Date columns
     .with_columns(
-        pl.col('REF_DATE').str.extract(r'^(\d+)').cast(pl.Int32).alias('YEAR'),
-        pl.col('REF_DATE').str.extract(r'(\d+)$').cast(pl.Int32).alias('MONTH')
+        pl.col("REF_DATE").str.extract(r"^(\d+)").cast(pl.Int32).alias("YEAR"),
+        pl.col("REF_DATE").str.extract(
+            r"(\d+)$").cast(pl.Int32).alias("MONTH"),
     )
-    .with_columns(
-        pl.date(pl.col('YEAR'), pl.col('MONTH'), 1).alias('DATE_YMD')
-    )
-    .sort(['YEAR', 'MONTH'])
+    .with_columns(pl.date(pl.col("YEAR"), pl.col("MONTH"), 1).alias("DATE_YMD"))
+    .sort(["YEAR", "MONTH"])
     .collect()
 )
 labour.glimpse()
 ```
 
+The main variables to vary here are
+
+- Industry (total, ...)
+- Labour Force characteristics (unemployment rate, ...)
+
+We keep all other variables constant
+
+- Location: Canada
+- Sex: M + F
+- Age: >15
+
 # Process data
 
 For our graphic, we need to make this variable: **signed rank in change in # of jobs**
 
-Per month
+*Signed* rank means that the rank is effectively computed over negative and positive %change separately, and in opposite directions (descending for negative, and ascending for positive).
 
-Check that each year has 12 months:
+Meaning the highest negative value (closest to 0) is rank=-1, and lowest positive value (closets to 0) is rank=1
 
-```{python}
-GT(labour.select('YEAR', 'MONTH').unique().group_by('YEAR').len())
-```
+e.g.
+
+[-0.01, -0.02, 0.01, 0.02] = 
+[-1, -2, 1, 2]
 
 ## % Change per month
 
 First, compute % change from previous month
 
+Do this for each industry * labour force characteristic
+
 ```{python}
 labour_processed = (
-    labour
-    .filter(pl.col('YEAR') >= 2020)
+    labour.filter(pl.col("YEAR") >= 2006)
     .rename({"North American Industry Classification System (NAICS)": "Industry"})
-
     # if we sort acesnding by time, then lag value is the month before
-    .sort(['Industry', 'YEAR', 'MONTH'])
-    .with_columns(LAGGED_VALUE=pl.col("VALUE").shift(1).over('Industry'))
-
+    .sort(["Industry", "YEAR", "MONTH"])
+    .with_columns(
+        LAGGED_VALUE=pl.col("VALUE")
+        .shift(1)
+        .over(["Industry", "Labour force characteristics"])
+    )
     # compute percent difference
     .with_columns((pl.col("VALUE") - pl.col("LAGGED_VALUE")).alias("DIFF"))
     .with_columns((pl.col("DIFF") / pl.col("LAGGED_VALUE")).alias("PDIFF"))
     .select(
-        pl.col('Industry'),
-        pl.col('DATE_YMD'),
-        pl.col('YEAR'),
-        pl.col('MONTH'), cs.matches('VALUE'), cs.matches('DIFF')
+        pl.col("Industry"),
+        cs.matches("Labour force characteristics"),
+        pl.col("DATE_YMD"),
+        pl.col("YEAR"),
+        pl.col("MONTH"),
+        cs.matches("VALUE"),
+        cs.matches("DIFF"),
     )
-    
-    .sort(['Industry', 'YEAR', 'MONTH', 'PDIFF'])
+    .sort(["Industry", "YEAR", "MONTH", "PDIFF"])
 )
 labour_processed
 ```
@@ -110,15 +139,12 @@ labour_processed
 
 Now we can compute **Signed Asceending Rank of industry by % change**
 
-*Signed* rank means that it is effectively computed over negative and positive %change separtely
+Define centered_rank_expr function which takes a polars series and returns an expression, meaning it can be used in a polars `with_columns` call, which is nice because it can take advantage of polars lazy-evaluation optimization.
 
-e.g.
-
-[-0.01, -0.02, 0.01, 0.02] = 
-[-1, -2, 1, 2]
-
-
-Define centered_rank_expr function
+- Leverages Polars' optimized expressions
+- Works well with lazy evaluation
+- Scales better with large datasets
+- Integrates seamlessly with other Polars operations
 
 ```{python}
 def centered_rank_expr(col):
@@ -142,27 +168,26 @@ def centered_rank_expr(col):
 
 
 test_series = (
-    labour_processed
-    .with_columns(pl.col('PDIFF').round(decimals=4))
-    .filter(pl.col('YEAR') == 2025, pl.col('MONTH') == 1)
-    .select(pl.col('PDIFF'))
-    .sample(n=10, seed=1)
-    .select('PDIFF')
+    labour_processed.filter(pl.col("Labour force characteristics") == "Employment")
+    .with_columns(pl.col("PDIFF").round(decimals=4))
+    .filter(pl.col("YEAR") == 2025, pl.col("MONTH") == 1)
+    .select(pl.col("PDIFF"))
+    .sample(n=5, seed=1)
+    .select("PDIFF")
 )
 
-test_series.with_columns(centered_rank_expr(
-    pl.col('PDIFF')).alias('rank')).sort('PDIFF')
+test_series.with_columns(centered_rank_expr(pl.col("PDIFF")).alias("rank")).sort(
+    "PDIFF"
+)
 ```
 
+
+Apply to data
+
 ```{python}
-labour_processed = (
-    labour_processed
-    .with_columns(sign=pl.col('PDIFF').sign())
-    .with_columns(
-        signed_rank=(
-            pl.col('sign')*pl.col('PDIFF').rank()).over(['YEAR', 'MONTH', 'sign']),
-        centered_rank=centered_rank_expr(
-            pl.col('PDIFF')).over(['YEAR', 'MONTH'])
+labour_processed = labour_processed.with_columns(
+    centered_rank_across_industry=centered_rank_expr(pl.col("PDIFF")).over(
+        ["Labour force characteristics", "YEAR", "MONTH"]
     )
 )
 labour_processed
@@ -173,24 +198,47 @@ labour_processed
 # check 1 year 1 month
 (
     labour_processed
-    .with_columns(pl.col('PDIFF').round(decimals=4))
-    .filter(pl.col('YEAR') == 2025, pl.col('MONTH') == 1)
-    .sort(['YEAR', 'MONTH', 'PDIFF'])
-    .select(['PDIFF', 'signed_rank', 'centered_rank'])
+    .with_columns(pl.col("PDIFF").round(decimals=4))
+    .filter(pl.col("YEAR") == 2025, pl.col("MONTH") == 1)
+    .sort(["YEAR", "MONTH", "PDIFF"])
+    .select(["PDIFF", cs.matches("rank")])
 )
 ```
 
 ```{python}
 (
-    ggplot(labour_processed, aes(x="DATE_YMD", y="centered_rank", color="PDIFF")) +
-    geom_point(shape='s')
+    ggplot(
+        (
+            labour_processed.filter(
+                pl.col("Labour force characteristics") == "Labour force",
+                pl.col("YEAR") >= 2023,
+                pl.col("YEAR") <= 2025
+            )
+        ), aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"))
+    + geom_point(shape="s")
+    + theme_tufte()
+    + theme(figure_size=(10, 8)) 
+    
+    #+ scale_color_gradient2(low="#ff0000ff", high="#0000dbff", midpoint=0)
 )
 ```
 
 
 # Exploratory
 
-
 ```{python}
-
+(
+    ggplot(
+        (
+            labour_processed.filter(
+                pl.col('Industry') == 'Total, all industries',
+                pl.col("Labour force characteristics") == "Unemployment rate"
+            )
+        ),
+        aes(x="DATE_YMD", y="VALUE", color="Labour force characteristics"),
+    )
+    + geom_point()
+    + geom_line()
+    + theme(figure_size=(6, 4))
+)
 ```
