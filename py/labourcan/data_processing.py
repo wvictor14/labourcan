@@ -1,6 +1,7 @@
 import polars as pl
 from pathlib import Path
 from typing import Union
+import polars.selectors as cs
 
 
 def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
@@ -69,5 +70,63 @@ def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
         )
         # Sort chronologically
         .sort(["YEAR", "MONTH"])
+
+        # Rename this really long column
+        .rename({"North American Industry Classification System (NAICS)": "Industry"})
+
         .collect()
+    )
+
+
+def calculate_centered_rank(df):
+    intermediate = calculate_pdiff_per_month(df)
+    out = intermediate.with_columns(
+        centered_rank_across_industry=centered_rank_expr(pl.col("PDIFF")).over(
+            ["YEAR", "MONTH"]
+        )
+    )
+    return out
+
+
+def calculate_pdiff_per_month(df, over="Industry"):
+    return (
+        # if we sort acesnding by time, then lag value is the month before
+        df.sort(["Industry", "YEAR", "MONTH"])
+        .with_columns(
+            LAGGED_VALUE=pl.col("VALUE")
+          .shift(1)
+          .over(over)
+        )
+        # compute percent difference
+        .with_columns((pl.col("VALUE") - pl.col("LAGGED_VALUE")).alias("DIFF"))
+        .with_columns((pl.col("DIFF") / pl.col("LAGGED_VALUE")).alias("PDIFF"))
+        .select(
+            pl.col("Industry"),
+            pl.col("DATE_YMD"),
+            pl.col("YEAR"),
+            pl.col("MONTH"),
+            cs.matches("VALUE"),
+            cs.matches("DIFF"),
+        )
+        .sort(["Industry", "YEAR", "MONTH", "PDIFF"])
+    )
+
+
+def centered_rank_expr(col):
+    """
+    - Largest negative value gets rank -1
+    - Smallest positive value gets rank +1
+    - Zero gets rank 0
+    """
+    return (
+        pl.when(col < 0)
+        .then(
+            # minus the total # of -ve values
+            (col.rank(method="ordinal", descending=True) * -1) + (col > 0).sum()
+        )
+        .when(col == 0)
+        .then(pl.lit(0))
+        .when(col > 0)
+        .then(col.rank(method="ordinal") - (col < 0).sum())
+        .otherwise(pl.lit(None))
     )
