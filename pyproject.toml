@@ -1,3 +1,13 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["py"]
+
+[tool.setuptools.package-dir]
+"" = "py"
+
 [project]
 name = "labourcan"
 version = "0.1.0"
@@ -7,6 +17,7 @@ requires-python = ">=3.13"
 dependencies = [
     "great-tables>=0.18.0",
     "ipykernel>=6.30.1",
+    "mizani>=0.14.2",
     "nbclient>=0.10.2",
     "nbformat>=5.10.4",
     "pandas>=2.3.2",
