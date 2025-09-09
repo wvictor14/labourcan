@@ -1,0 +1,93 @@
+﻿"Cube Title","Product Id","CANSIM Id",URL,"Cube Notes","Archive Status",Frequency,"Start Reference Period","End Reference Period","Total number of dimensions"
+"Employment by industry, monthly, seasonally adjusted and unadjusted, and trend-cycle, last 5 months","14100355","282-0088","https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410035501",1;3;9;18,"CURRENT - a cube available to the public and that is current","Monthly","1976-01-01","2025-08-01","4",
+
+"Dimension ID","Dimension name","Dimension Notes","Dimension Definitions"
+"1","Geography",16,""
+"2","North American Industry Classification System (NAICS)",2,""
+"3","Statistics",,""
+"4","Data type",,""
+
+"Dimension ID","Member Name","Classification Code","Member ID","Parent Member ID",Terminated,"Member Notes","Member Definitions"
+"1","Newfoundland and Labrador","[10]","2","1","",,
+"1","Prince Edward Island","[11]","3","1","",,
+"1","Nova Scotia","[12]","4","1","",,
+"1","New Brunswick","[13]","5","1","",,
+"1","Quebec","[24]","6","1","",,
+"1","Ontario","[35]","7","1","",,
+"1","Saskatchewan","[47]","9","1","",,
+"1","Alberta","[48]","10","1","",,
+"1","British Columbia","[59]","11","1","",,
+"1","Manitoba","[46]","8","1","",,
+"1","Canada","[11124]","1","","",,
+"2","Goods-producing sector","","2","1","",7,
+"2","Services-producing sector","","8","1","",8,
+"2","Agriculture","[111-112, 1100, 1151-1152]","3","2","",10,
+"2","Forestry, fishing, mining, quarrying, oil and gas","[21, 113-114, 1153, 2100]","4","2","",11;12,
+"2","Utilities","[22]","5","2","",,
+"2","Construction","[23]","6","2","",,
+"2","Manufacturing","[31-33]","7","2","",,
+"2","Wholesale and retail trade","[41, 44-45]","9","8","",,
+"2","Transportation and warehousing","[48-49]","10","8","",,
+"2","Finance, insurance, real estate, rental and leasing","[52-53]","11","8","",,
+"2","Professional, scientific and technical services","[54]","12","8","",,
+"2","Business, building and other support services","[55-56]","13","8","",4,
+"2","Educational services","[61]","14","8","",,
+"2","Health care and social assistance","[62]","15","8","",,
+"2","Information, culture and recreation","[51, 71]","16","8","",,
+"2","Accommodation and food services","[72]","17","8","",,
+"2","Other services (except public administration)","[81]","18","8","",,
+"2","Public administration","[91]","19","8","",,
+"2","Wholesale trade","[41]","20","9","",,
+"2","Retail trade","[44-45]","21","9","",,
+"2","Total employed, all industries","","1","","",6,
+"3","Estimate","","1","","",,
+"3","Standard error of estimate","","2","","",13,
+"3","Standard error of month-to-month change","","3","","",14,
+"3","Standard error of year-over-year change","","4","","",15,
+"4","Seasonally adjusted","","1","","",,
+"4","Unadjusted","","2","","",,
+"4","Trend-cycle","","3","","",17,
+
+Symbol Legend
+Description,Symbol
+"not available for a specific reference period","..",
+"less than the limit of detection","<LOD",
+"value rounded to 0 (zero) where there is a meaningful distinction between true zero and the value that was rounded","0s",
+"data quality: excellent","A",
+"data quality: very good","B",
+"data quality: good","C",
+"data quality: acceptable","D",
+"use with caution","E",
+"too unreliable to be published","F",
+"not applicable","...",
+"preliminary","p",
+"revised","r",
+"suppressed to meet the confidentiality requirements of the Statistics Act","x",
+"terminated","t",
+
+"Survey Code","Survey Name"
+"3701","Labour Force Survey"
+
+"Subject Code","Subject Name"
+"14","Labour"
+
+"Note ID",Note
+1,"Fluctuations in economic time series are caused by seasonal, cyclical and irregular movements. A seasonally adjusted series is one from which seasonal movements have been eliminated. Seasonal movements are defined as those which are caused by regular annual events such as climate, holidays, vacation periods and cycles related to crops, production and retail sales associated with Christmas and Easter. It should be noted that the seasonally adjusted series contain irregular as well as longer-term cyclical fluctuations. The seasonal adjustment program is a complicated computer program which differentiates between these seasonal, cyclical and irregular movements in a series over a number of years and, on the basis of past movements, estimates appropriate seasonal factors for current data. On an annual basis, the historic series of seasonally adjusted data are revised in light of the most recent information on changes in seasonality."
+2,"Industry refers to the general nature of the business carried out by the employer for whom the respondent works (main job only). Industry estimates in this table are based on the 2022 North American Industry Classification System (NAICS)."
+3,"To ensure respondent confidentiality, estimates below a certain threshold are suppressed. For Canada, Quebec, Ontario, Alberta and British Columbia suppression is applied to all data below 1,500. The threshold level for Newfoundland and Labrador, Nova Scotia, New Brunswick, Manitoba and Saskatchewan is 500, while in Prince Edward Island, estimates under 200 are suppressed. Census metropolitan areas (CMAs) and economic regions (ERs) use their respective provincial suppression levels mentioned above. Estimates are based on smaller sample sizes the more detailed the table becomes, which could result in lower data quality."
+4,"Formerly "Management of companies and administrative and other support services"."
+6,"This combines the North American Industry Classification System (NAICS) codes 11 to 91."
+7,"This combines the North American Industry Classification System (NAICS) codes 11 to 33."
+8,"This combines the North American Industry Classification System (NAICS) codes 41 to 91."
+9,"For more information on seasonal adjustment see <a href="http://www.statcan.gc.ca/eng/dai/btd/sad-faq" rel="external noopener noreferrer" target="_blank">Seasonally adjusted data - Frequently asked questions (opens new window)</a>."
+10,"Labour Force Survey (LFS) North American Industry Classification System (NAICS) code exception: add group 1100 - Farming - not elsewhere classified (nec). When the type of farm activity cannot be distinguished between crop and livestock, (for example: mixed farming)."
+11,"Labour Force Survey (LFS) North American Industry Classification System (NAICS) code exception: add group 2100 - Mining - not elsewhere classified (nec). Whenever the type of mining activity cannot be distinguished."
+12,"Also referred to as Natural resources."
+13,"The standard error (SE) of an estimate is an indicator of the variability associated with this estimate, as the estimate is based on a sample rather than the entire population. The SE can be used to construct confidence intervals and calculate coefficients of variation (CVs). The confidence interval can be built by adding the SE to an estimate in order to determine the upper limit of this interval, and by subtracting the same amount from the estimate to determine the lower limit. The CV can be calculated by dividing the SE by the estimate. See Section 7 of the <a href="https://www150.statcan.gc.ca/n1/en/catalogue/71-543-G#wb-auto-2" rel="external noopener noreferrer" target="_blank">Guide to the Labour Force Survey (opens new window)</a> for more information. The standard errors presented in this table are the average of the standard errors for 12 previous months, and are updated twice a year, in February and August."
+14,"The standard error (SE) for the month-to-month change is an indicator of the variability associated with the estimate of the change between two consecutive months, because each monthly estimate is based on a sample rather than the entire population. To construct confidence intervals, the SE is added to an estimate in order to determine the upper limit of this interval, and then subtracted from the estimate to determine the lower limit. Using this method, the true value will fall within one SE of the estimate approximately 68% of the time, and within two standard errors approximately 95% of the time. For example, if the estimated employment level increases by 20,000 from one month to another and the associated SE is 29,000, the true value of the employment change has a 68% chance of falling between -9,000 and +49,000. Because such a confidence interval includes zero, the 20,000 change would not be considered statistically significant. However, if the increase is 30,000, the confidence interval would be +1,000 to +59,000, and the 30,000 increase would be considered statistically significant. (Note that 30,000 is above the SE of 29,000, and that the confidence interval does not include zero.) Similarly, if the estimated employment declines by 30,000, then the true value of the decline would fall between -59,000 and -1,000. See Section 7 of the <a href="https://www150.statcan.gc.ca/n1/en/catalogue/71-543-G" rel="external noopener noreferrer" target="_blank">Guide to the Labour Force Survey (opens new window)</a> for more information. The standard errors presented in this table are the average of standard errors for 12 previous months. They are updated twice a year, in February and August. Note that the estimate of the month-to-month change is not included in this table. It can be calculated by taking the estimate level for one month and subtracting from it the estimate level of the previous month."
+15,"The standard error (SE) for the year-over-year change is an indicator of the variability associated with the estimate of the change between a given month in a given year and the same month of the previous year, because each month's estimate is based on a sample rather than the entire population. The SE can be used to construct confidence intervals: it can be added to an estimate in order to determine the upper limit of this interval, and then subtracted from the same estimate to determine the lower limit. Using this method, the true value will fall within one SE of the estimate, approximately 68% of the time, and within two standard errors, approximately 95% of the time. For example, if the estimated employment level increases by 160,000 over 12 months and the associated SE is 55,000, the true value of the change in employment has approximately a 68% chance of falling between +105,000 and +215,000. This change would be considered statistically significant at the 68% level as the confidence interval excludes zero. However, if the increase is 40,000, the interval would be -15,000 to +95,000, and this increase would not be considered statistically significant since the interval includes zero. See Section 7 of the <a href="https://www150.statcan.gc.ca/n1/en/catalogue/71-543-G" rel="external noopener noreferrer" target="_blank">Guide to the Labour Force Survey (opens new window)</a> for more information. The standard errors presented in this table are the average of standard errors for 12 previous months and are updated twice a year, in February and August. Note that estimates of the year-over-year change are not included in the tables. They can be calculated by taking the estimate level for a given month in a given year and subtracting from it the estimate level of the same month in the previous year."
+16,"Excluding the territories."
+17,"These data represent a smoothed version of the seasonally adjusted time series. They provide information on longer-term movements, including changes in direction underlying the series. For more information, see <a href="http://www.statcan.gc.ca/eng/dai/btd/tce-faq" rel="external noopener noreferrer" target="_blank">Trend-cycle estimates: Frequently asked questions (opens new window)</a>."
+18,"Starting in 2006, enhancements to the Labour Force Survey data processing system may have introduced a level shift in some estimates, particularly for less common labour force characteristics. Use caution when comparing estimates before and after 2006. For more information, contact statcan.labour-travail.statcan@statcan.gc.ca"
+
+"Correction ID","Correction Date","Correction Note"
