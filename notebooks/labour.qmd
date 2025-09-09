@@ -28,6 +28,7 @@ from mizani.bounds import squish
 from pyprojroot import here
 from great_tables import GT, md, html
 from plotnine import *
+from labourcan.data_processing import helloworld
 ```
 
 ## Data
