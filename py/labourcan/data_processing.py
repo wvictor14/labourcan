@@ -47,10 +47,11 @@ def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
             "TERMINATED",       # Termination indicator
             "DECIMALS",         # Number of decimal places
         ])
-        # Filter to seasonally adjusted estimates only
+        # Filter to seasonally adjusted estimates only, and for Canada
         .filter(
             pl.col("Statistics") == "Estimate",
-            pl.col("Data type") == "Seasonally adjusted"
+            pl.col("Data type") == "Seasonally adjusted",
+            pl.col('GEO') == "Canada"
         )
         # Extract YEAR and MONTH from REF_DATE (format: YYYY-MM)
         .with_columns([
