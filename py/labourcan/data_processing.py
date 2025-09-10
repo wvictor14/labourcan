@@ -2,6 +2,7 @@ import polars as pl
 from pathlib import Path
 from typing import Union
 import polars.selectors as cs
+from pyprojroot import here
 
 
 def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
