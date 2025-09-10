@@ -29,7 +29,7 @@ from mizani.bounds import squish
 from pyprojroot import here
 from great_tables import GT, md, html
 from plotnine import *
-from labourcan.data_processing import read_labourcan
+from labourcan.data_processing import read_labourcan,calculate_centered_rank,calculate_monthly_percent_change
 ```
 
 ## Read data
@@ -44,6 +44,7 @@ from labourcan.data_processing import read_labourcan
 
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
+labour_processed = calculate_monthly_percent_change(labour)
 #   .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
 #        pl.col("GEO") == "Canada",
 #      ~pl.col('North American Industry Classification System (NAICS)').is_in([
@@ -51,5 +52,4 @@ labour = read_labourcan(LABOUR_DATA_FILE)
 # 'Goods-producing sector',
 # 'Services-producing sector'
 # ]),
-labour.glimpse()
 ```
