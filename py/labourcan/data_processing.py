@@ -223,3 +223,14 @@ def centered_rank_expr(col: pl.Expr) -> pl.Expr:
         .then(col.rank(method="ordinal") - (col < 0).sum())
         .otherwise(pl.lit(None))  # Handle null values
     )
+
+
+def main() -> pl.DataFrame:
+    LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
+    labour = read_labourcan(LABOUR_DATA_FILE)
+    labour_processed = calculate_monthly_percent_change(labour)
+    return labour_processed
+
+
+if __name__ == "__main__":
+    main()
