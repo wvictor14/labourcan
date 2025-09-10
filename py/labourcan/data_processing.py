@@ -74,6 +74,10 @@ def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
         # Rename this really long column
         .rename({"North American Industry Classification System (NAICS)": "Industry"})
 
+        # handle missing values in VALUE
+        .filter(pl.col('VALUE').str.contains(r'^\s*-?\d+\.?\d*\s*$'))
+        .with_columns(pl.col("VALUE").cast(pl.Float64))
+
         .collect()
     )
 
