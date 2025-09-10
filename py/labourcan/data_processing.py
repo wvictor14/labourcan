@@ -147,29 +147,44 @@ def calculate_monthly_percent_change(
         - Percentage changes are in decimal format (0.05 = 5% increase)
         - Negative PDIFF values indicate month-over-month decreases
     """
-    sort_cols = [group_by, "YEAR", "MONTH"]
 
-    return (
-        # sort chronologically by time, then lag value is the month before
-        # but also perform over groups
-        df.sort(sort_cols)
+    # Ensure group_by is always a list for consistent handling
+    if isinstance(group_by, str):
+        group_by_list = [group_by]
+    else:
+        group_by_list = group_by
+    sort_cols = group_by_list + ["YEAR", "MONTH"]
+
+    # sort chronologically by time, then lag value is the month before
+    # but also perform over groups
+    lagged = (
+        df
+        .sort(sort_cols)
         .with_columns(
             LAGGED_VALUE=pl.col("VALUE")
             .shift(1)
-            .over(group_by)
+            .over(group_by_list)
         )
-        # compute absolute and percent difference
+    )
+
+    # compute absolute and percent difference
+    pdiff = (
+        lagged
         .with_columns((pl.col("VALUE") - pl.col("LAGGED_VALUE")).alias("DIFF"))
         .with_columns((pl.col("DIFF") / pl.col("LAGGED_VALUE")).alias("PDIFF"))
+    )
+
+    return (
+        pdiff
         .select(
-            pl.col(group_by),
+            pl.col(group_by_list),
             pl.col("DATE_YMD"),
             pl.col("YEAR"),
             pl.col("MONTH"),
             cs.matches("VALUE"),
             cs.matches("DIFF"),
         )
-        .sort([group_by, "YEAR", "MONTH", "PDIFF"])
+        .sort(group_by_list + ["YEAR", "MONTH", "PDIFF"])
     )
 
 
