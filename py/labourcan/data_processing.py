@@ -78,8 +78,33 @@ def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
     )
 
 
-def calculate_centered_rank(df):
-    intermediate = calculate_pdiff_per_month(df)
+def calculate_centered_rank(
+    df: pl.DataFrame,
+) -> pl.DataFrame:
+    """
+    Calculate monthly percentage changes and add centered rankings within time periods.
+
+    This function combines monthly percentage change calculations with centered ranking
+    to identify relative performance of different groups (e.g., industries) within
+    each time period (year-month combination).
+
+    Args:
+        df (pl.DataFrame): Input DataFrame with labour data
+
+    Returns:
+        pl.DataFrame: DataFrame with monthly changes and centered ranks, including:
+            - All columns from calculate_monthly_percent_change()
+            - New ranking column "centered_rank_across_industry" showing relative performance 
+              within each time period
+
+    Interpretation of Ranks:
+        - Rank 0: No change (PDIFF ≈ 0)
+        - Negative ranks: Below-average performance (decreases)
+            - Rank -1: Worst performer (largest decrease)
+        - Positive ranks: Above-average performance (increases)  
+            - Rank 1: Best performer among those with increase
+    """
+    intermediate = calculate_monthly_percent_change(df)
     out = intermediate.with_columns(
         centered_rank_across_industry=centered_rank_expr(pl.col("PDIFF")).over(
             ["YEAR", "MONTH"]
@@ -88,35 +113,84 @@ def calculate_centered_rank(df):
     return out
 
 
-def calculate_pdiff_per_month(df, over="Industry"):
+def calculate_monthly_percent_change(
+    df: pl.DataFrame,
+    group_by: str = "Industry"
+) -> pl.DataFrame:
+    """
+    Calculate month-over-month percentage change for labour statistics.
+
+    This function computes the percentage difference between consecutive months
+    for each group (e.g., by Industry), providing insights into monthly growth rates.
+
+    Args:
+        df (pl.DataFrame): Input DataFrame containing labour data with columns:
+            - group_by column (default "Industry")  
+            - value_col (default "VALUE")
+            - "YEAR", "MONTH", "DATE_YMD" for time sorting
+        group_by (str): Column name to group by when calculating changes. 
+            Defaults to "Industry"
+
+    Returns:
+        pl.DataFrame: DataFrame with original data plus new columns:
+            - LAGGED_VALUE: Previous month's value for the same group
+            - DIFF: Absolute difference (current - previous)
+            - PDIFF: Percentage difference ((current - previous) / previous)
+
+    Note:
+        - First observation for each group will have null values for LAGGED_VALUE, 
+          DIFF, and PDIFF since there's no previous month to compare against
+        - Percentage changes are in decimal format (0.05 = 5% increase)
+        - Negative PDIFF values indicate month-over-month decreases
+    """
+    sort_cols = [group_by, "YEAR", "MONTH"]
+
     return (
-        # if we sort acesnding by time, then lag value is the month before
-        df.sort(["Industry", "YEAR", "MONTH"])
+        # sort chronologically by time, then lag value is the month before
+        # but also perform over groups
+        df.sort(sort_cols)
         .with_columns(
             LAGGED_VALUE=pl.col("VALUE")
-          .shift(1)
-          .over(over)
+            .shift(1)
+            .over(group_by)
         )
-        # compute percent difference
+        # compute absolute and percent difference
         .with_columns((pl.col("VALUE") - pl.col("LAGGED_VALUE")).alias("DIFF"))
         .with_columns((pl.col("DIFF") / pl.col("LAGGED_VALUE")).alias("PDIFF"))
         .select(
-            pl.col("Industry"),
+            pl.col(group_by),
             pl.col("DATE_YMD"),
             pl.col("YEAR"),
             pl.col("MONTH"),
             cs.matches("VALUE"),
             cs.matches("DIFF"),
         )
-        .sort(["Industry", "YEAR", "MONTH", "PDIFF"])
+        .sort([group_by, "YEAR", "MONTH", "PDIFF"])
     )
 
 
-def centered_rank_expr(col):
+def centered_rank_expr(col: pl.Expr) -> pl.Expr:
     """
+    Create a centered ranking expression that ranks values around zero.
+
+    This ranking system treats zero as the center point, with negative values
+    ranked negatively and positive values ranked positively.
+
     - Largest negative value gets rank -1
     - Smallest positive value gets rank +1
     - Zero gets rank 0
+
+    Args:
+        col (pl.Expr): Polars expression for the column to rank
+
+    Example:
+        Given values: [-0.05, -0.02, 0, 0.01, 0.03]
+        Centered ranks: [-1, -2, 0, 1, 2]
+        >>> df = pl.DataFrame({"values": [-0.05, -0.02, 0, 0.01, 0.03]})
+        >>> df.with_columns(
+        ...     centered_rank=centered_rank_expr(pl.col("values"))
+        ... )
+
     """
     return (
         pl.when(col < 0)
@@ -128,5 +202,5 @@ def centered_rank_expr(col):
         .then(pl.lit(0))
         .when(col > 0)
         .then(col.rank(method="ordinal") - (col < 0).sum())
-        .otherwise(pl.lit(None))
+        .otherwise(pl.lit(None))  # Handle null values
     )
