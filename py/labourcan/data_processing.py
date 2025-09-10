@@ -119,7 +119,7 @@ def calculate_centered_rank(
 
 def calculate_monthly_percent_change(
     df: pl.DataFrame,
-    group_by: str = "Industry"
+    group_by: str | list[str] = ["Industry", "GEO"]
 ) -> pl.DataFrame:
     """
     Calculate month-over-month percentage change for labour statistics.
