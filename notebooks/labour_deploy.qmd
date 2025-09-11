@@ -3,6 +3,8 @@ title: "Exploring Labour data"
 format: 
   html:
     toc: true
+    fig-height: 10
+    fig-width: 8
 jupyter: python3
 editor: 
   render-on-save: true
@@ -18,6 +20,7 @@ from pyprojroot import here
 ```{python}
 # | tags: [parameters]
 LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
+FIGURE_THEME_SIZE = (6.5, 5)
 ```
 
 ## Libraries
@@ -34,22 +37,170 @@ from labourcan.data_processing import read_labourcan,calculate_centered_rank,cal
 
 ## Read data
 
-[read_labourcan](../py/labourcan/data_processing.py) returns a polars dataframe with columns:
+[`read_labourcan`](../py/labourcan/data_processing.py) returns a polars with:
 
-- Unnecessary metadata columns removed
+- Unused columns removed
 - Filtered to seasonally adjusted estimates only
+- Filtered to Canada level estimates
 - Additional `YEAR`, `MONTH`, and `DATE_YMD` columns extracted from `REF_DATE`
 - Sorted chronologically by year and month
 
+See [notebooks/labour.qmd](../notebooks/labour.qmd) for details on data processing.
 
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
-labour_processed = calculate_monthly_percent_change(labour)
-#   .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
-#        pl.col("GEO") == "Canada",
-#      ~pl.col('North American Industry Classification System (NAICS)').is_in([
-# 'Total employed, all industries',
-# 'Goods-producing sector',
-# 'Services-producing sector'
-# ]),
+labour_processed = calculate_centered_rank(labour)
+```
+
+# Visualization
+
+Let's take a stab at a first visual. 
+
+```{python}
+#| page-layout: column-page
+(
+    ggplot(
+        (
+            labour_processed.filter(
+                pl.col("YEAR") >= 2023,
+                pl.col("YEAR") <= 2025
+            )
+        ), aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"))
+    + geom_point(shape="s")
+    + theme_tufte()
+    + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
+
+    + scale_color_gradient2(
+        limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish)
+)
+```
+
+## `geom_point` or `geom_tile`
+
+It looks good. but the whitespace between each point is distracting. I could make 
+the point size larger, but the ratio of point size to range of the x and y axis, as well as
+the figure size all will determine ultimately how much whitespace remains between each point.
+
+We can use `geom_tile` instead, which will plot rectangles specified by a center point. 
+
+```{python}
+labour_processed_cat = labour_processed.drop_nulls(
+    ['centered_rank_across_industry'])
+order = (
+    labour_processed_cat.select('centered_rank_across_industry').unique().sort(
+        'centered_rank_across_industry')
+    .to_series()
+    .cast(pl.Utf8)
+    .to_list()
+)
+
+labour_processed_cat = (
+    labour_processed_cat.with_columns(
+        pl.col('centered_rank_across_industry').cast(
+            pl.Utf8).cast(pl.Enum(categories=order)).alias('centered_rank_cat')
+    )
+)
+
+(
+    ggplot((
+        labour_processed_cat.filter(
+            pl.col("YEAR") >= 2023,
+            pl.col("YEAR") <= 2025
+        )
+    ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF"))
+    + geom_tile(height=0.95)  # whitespace between tiles, vertically
+    + theme_tufte()
+    + theme(
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_x=element_text(angle=90)
+    )
+    + scale_fill_gradient2(
+        limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish)
+
+)
+```
+
+This is looking pretty good. 
+
+
+I am fairly happy with the `squish`, however it doesn't quite match the 
+more dynamic color palette that I'm seeking.
+
+To be more explicit with the colors, I will bin the PDIFF and map colors manually
+
+
+```{python}
+labour_processed_cutted = labour_processed_cat.with_columns(
+    pl.col('PDIFF')
+    .cut([-0.01, -0.0075, -0.005, -0.0025, 0, 0.0075, 0.005, 0.0025, 0.01])
+    .alias('PDIFF_BINNED')
+).sort('PDIFF').with_columns(
+  pl.col('PDIFF_BINNED')
+)
+labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
+```
+
+```{python}
+(
+    ggplot(
+        (
+            labour_processed_cutted.filter(
+                pl.col("YEAR") >= 2023,
+                pl.col("YEAR") <= 2025
+            )
+        ), aes(x="DATE_YMD", y="centered_rank_cat", fill="PDIFF_BINNED"))
+    + geom_tile(height=0.95)  # whitespace between tiles, vertically
+    + theme_tufte()
+    + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
+)
+```
+
+Now we need to order the levels, and map explicit colors
+
+```{python}
+
+order = (
+    labour_processed_cutted
+    .drop_nulls()
+    .sort('PDIFF')
+    .select(pl.col('PDIFF_BINNED'))
+    .unique(maintain_order=True)
+    .to_series()
+    .to_list()
+)
+
+labour_processed_cutted_ordered = (
+    labour_processed_cutted
+    .with_columns(
+        pl.col('PDIFF_BINNED').cast(pl.Enum(order))
+    )
+)
+
+color_mapping = {
+    '(-inf, -0.01]': '#D73027',
+    '(-0.01, -0.0075]': '#F46D43',
+    '(-0.0075, -0.005]': '#FDAE61',
+    '(-0.005, -0.0025]': '#FEE08B',
+    '(-0.0025, 0]': '#FFFFBF',
+    '(0, 0.0025]': '#E6F5D0',
+    '(0.0025, 0.005]': '#B8E186',
+    '(0.005, 0.0075]': '#7FBC41',
+    '(0.0075, 0.01]': '#4D9221',
+    '(0.01, inf]': '#1A5490'
+}
+
+(
+    ggplot(
+        (
+            labour_processed_cutted.filter(
+                pl.col("YEAR") >= 2019,
+                pl.col("YEAR") <= 2025
+            )
+        ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"))
+    + geom_tile(color='white')
+    # + geom_point(shape="s")
+    + theme_tufte()
+    + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
+    + scale_fill_manual(values=color_mapping, breaks=order)
+)
 ```
