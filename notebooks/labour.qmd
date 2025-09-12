@@ -3,6 +3,7 @@ title: "Exploring Labour data"
 format: 
   html:
     toc: true
+    embed-resources: true
 jupyter: python3
 editor: 
   render-on-save: true
@@ -41,40 +42,35 @@ from labourcan.data_processing import read_labourcan
 - Additional `YEAR`, `MONTH`, and `DATE_YMD` columns extracted from `REF_DATE`
 - Sorted chronologically by year and month
 
-
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
-#   .with_columns(pl.col("VALUE").replace("", "0.0").cast(pl.Float64))
-#        pl.col("GEO") == "Canada",
-#      ~pl.col('North American Industry Classification System (NAICS)').is_in([
-# 'Total employed, all industries',
-# 'Goods-producing sector',
-# 'Services-producing sector'
-# ]),
 labour.glimpse()
 ```
 
-
 # Process data
 
-For our graphic, we need to make this variable: **signed rank in change in # of jobs**
+For our graphic, we need to make this variable: **signed cenetered rank in % change in # of jobs**
 
-*Signed* rank means that the rank is effectively computed over negative and positive %change separately, and in opposite directions (descending for negative, and ascending for positive).
+*Signed* referring to that the rank is effectively computed over negative and positive %change separately, and in opposite directions (descending for negative, and ascending for positive).
 
-Meaning the highest negative value (closest to 0) is rank=-1, and lowest positive value (closets to 0) is rank=1
+Meaning the highest negative value (closest to 0) is `rank = -1`, and lowest positive value (closets to 0) is `rank = 1`
 
-e.g.
+For example:
 
-```
-[-0.01, -0.02, 0.01, 0.02] = 
-[-1, -2, 1, 2]
-```
+- Input is vector of % change which can be positive or negative: `[-0.01, -0.02, 0.01, 0.02]`
+- Output: `[-1, -2, 1, 2]`
 
 ## % Change per month
 
-First, compute % change from previous month
+First, compute % change from previous month. This needs to be done over different subsets of data:
 
-Do this for each industry * labour force characteristic
+- Industry 
+- Geolocation
+- Labour Force Characteristic (If provided)
+- Gender 
+- Age group
+
+In the seasonally adjusted dataset, only Industry and Geolocation are provided. The LFC is total employment, the Gender is both, and Age group is all.
 
 ```{python}
 labour_processed = (
@@ -99,19 +95,16 @@ labour_processed = (
     )
     .sort(["Industry", "YEAR", "MONTH", "PDIFF"])
 )
-labour_processed
+labour_processed.glimpse()
 ```
 
-## Centered rank
+## Signed Centered Rank
 
-Now we can compute **Signed Ascending Rank of industry by % change**
+Now we can compute the `signed centered rank`.
 
-Define centered_rank_expr function which takes a polars series and returns an expression, meaning it can be used in a polars `with_columns` call, which is nice because it can take advantage of polars lazy-evaluation optimization.
+Define `centered_rank_expr` function which takes a polars series and returns an expression, meaning it can be used in a polars `with_columns` call, which is nice because it can take advantage of polars lazy-evaluation optimization.
 
-- Leverages Polars' optimized expressions
-- Works well with lazy evaluation
-- Scales better with large datasets
-- Integrates seamlessly with other Polars operations
+Below is the definition and a test-case.
 
 ```{python}
 def centered_rank_expr(col):
@@ -133,14 +126,14 @@ def centered_rank_expr(col):
         .otherwise(pl.lit(None))
     )
 
-
+# test it on this subset of data
 test_series = (
     # .filter(pl.col("Labour force characteristics") == "Employment")
     labour_processed
     .with_columns(pl.col("PDIFF").round(decimals=4))
     .filter(pl.col("YEAR") == 2025, pl.col("MONTH") == 1)
     .select(pl.col("PDIFF"))
-    .sample(n=3, seed=1)
+    .sample(n=10, seed=1)
     .select("PDIFF")
 )
 
@@ -150,7 +143,7 @@ test_series.with_columns(centered_rank_expr(pl.col("PDIFF")).alias("rank")).sort
 ```
 
 
-Apply to data
+Looks good, so now we can apply to the data:
 
 ```{python}
 labour_processed = labour_processed.with_columns(
@@ -158,9 +151,10 @@ labour_processed = labour_processed.with_columns(
         ["YEAR", "MONTH"]
     )
 )
-labour_processed
+labour_processed.glimpse()
 ```
 
+Check output visually for 1 year 1 month 
 
 ```{python}
 # check 1 year 1 month
@@ -169,16 +163,21 @@ labour_processed
     .with_columns(pl.col("PDIFF").round(decimals=4))
     .filter(pl.col("YEAR") == 2025)
     .sort(["YEAR", "MONTH", "PDIFF"])
-    .select(["YEAR", "MONTH", "PDIFF", cs.matches("rank")])
+    .select(["YEAR", "MONTH", "Industry", "VALUE", "DIFF", "PDIFF", cs.matches("rank")])
 )
 ```
+
+
+# Graphics
+
+Now we can develop our visualization
 
 ```{python}
 (
     ggplot(
         (
             labour_processed.filter(
-                pl.col("YEAR") >= 2000,
+                pl.col("YEAR") >= 2020,
                 pl.col("YEAR") <= 2025
             )
         ), aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"))
@@ -191,7 +190,8 @@ labour_processed
 )
 ```
 
-TRy with ordinal
+Try with ordinal
+
 ```{python}
 plot_data = labour_processed.filter(
     pl.col("YEAR") >= 2008,
@@ -220,11 +220,11 @@ plot_data = (
     + geom_tile()
     + theme_tufte()
     + theme(
-      figure_size=(10, 10), 
-      aspect_ratio=0.25,
-      axis_text_x=element_text(angle=90)
-      )
-      +coord_equal() 
+        figure_size=(10, 10),
+        aspect_ratio=0.25,
+        axis_text_x=element_text(angle=90)
+    )
+    + coord_equal()
     + scale_fill_gradient2(
         limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish)
 
