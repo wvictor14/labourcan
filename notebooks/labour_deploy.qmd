@@ -3,8 +3,7 @@ title: "Exploring Labour data"
 format: 
   html:
     toc: true
-    fig-height: 10
-    fig-width: 8
+    embed-resources: true
 jupyter: python3
 editor: 
   render-on-save: true
@@ -20,7 +19,8 @@ from pyprojroot import here
 ```{python}
 # | tags: [parameters]
 LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
-FIGURE_THEME_SIZE = (6.5, 5)
+FIGURE_THEME_SIZE = (8, 6)
+FILTER_YEAR = (2018, 2025)
 ```
 
 ## Libraries
@@ -57,13 +57,13 @@ labour_processed = calculate_centered_rank(labour)
 Let's take a stab at a first visual. 
 
 ```{python}
-#| page-layout: column-page
+# | page-layout: column-page
 (
     ggplot(
         (
             labour_processed.filter(
-                pl.col("YEAR") >= 2023,
-                pl.col("YEAR") <= 2025
+                pl.col("YEAR") >= FILTER_YEAR[0],
+                pl.col("YEAR") <= FILTER_YEAR[1]
             )
         ), aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"))
     + geom_point(shape="s")
@@ -104,8 +104,8 @@ labour_processed_cat = (
 (
     ggplot((
         labour_processed_cat.filter(
-            pl.col("YEAR") >= 2023,
-            pl.col("YEAR") <= 2025
+            pl.col("YEAR") >= FILTER_YEAR[0],
+            pl.col("YEAR") <= FILTER_YEAR[1]
         )
     ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF"))
     + geom_tile(height=0.95)  # whitespace between tiles, vertically
@@ -120,22 +120,29 @@ labour_processed_cat = (
 )
 ```
 
-This is looking pretty good. 
+This is looking pretty good. I added `height = 0.95` to add some whitespace between tiles vertically.
+I actually wanted to remove whitespace completely, but I discovered `width` for `geom_tile` doesn't 
+work the same as it does for `ggplot2`. If I set `width=1` it seems to make the tiles smaller, instead of wider.
 
 
-I am fairly happy with the `squish`, however it doesn't quite match the 
-more dynamic color palette that I'm seeking.
+## Explicit color mapping with `scale_color_manual`
 
-To be more explicit with the colors, I will bin the PDIFF and map colors manually
+I am fairly happy with the `scale_fill_gradient2` used with `squish`. We get a really nice palette 
+that's centered around 0. However `scale_fill_gradient2` is limited to 3 colors (high, midpoint, low),
+which is not quite enable the more dynamic color palette that I'm seeking.
 
+To be more explicit with the colors, I will bin the `PDIFF` and map colors manually
+using `scale_fill_manual`
+
+### Bin with `polars.Series.cut`
 
 ```{python}
 labour_processed_cutted = labour_processed_cat.with_columns(
     pl.col('PDIFF')
-    .cut([-0.01, -0.0075, -0.005, -0.0025, 0, 0.0075, 0.005, 0.0025, 0.01])
+    .cut([-0.05, -0.025, -0.01, -0.005, 0, 0.005, 0.01, 0.025, 0.05])
     .alias('PDIFF_BINNED')
 ).sort('PDIFF').with_columns(
-  pl.col('PDIFF_BINNED')
+    pl.col('PDIFF_BINNED')
 )
 labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
 ```
@@ -145,8 +152,8 @@ labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
     ggplot(
         (
             labour_processed_cutted.filter(
-                pl.col("YEAR") >= 2023,
-                pl.col("YEAR") <= 2025
+                pl.col("YEAR") >= FILTER_YEAR[0],
+                pl.col("YEAR") <= FILTER_YEAR[1]
             )
         ), aes(x="DATE_YMD", y="centered_rank_cat", fill="PDIFF_BINNED"))
     + geom_tile(height=0.95)  # whitespace between tiles, vertically
@@ -154,6 +161,8 @@ labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
 )
 ```
+
+### `scale_fill_manual` for explicit color mapping
 
 Now we need to order the levels, and map explicit colors
 
@@ -177,24 +186,24 @@ labour_processed_cutted_ordered = (
 )
 
 color_mapping = {
-    '(-inf, -0.01]': '#D73027',
-    '(-0.01, -0.0075]': '#F46D43',
-    '(-0.0075, -0.005]': '#FDAE61',
-    '(-0.005, -0.0025]': '#FEE08B',
-    '(-0.0025, 0]': '#FFFFBF',
-    '(0, 0.0025]': '#E6F5D0',
-    '(0.0025, 0.005]': '#B8E186',
-    '(0.005, 0.0075]': '#7FBC41',
-    '(0.0075, 0.01]': '#4D9221',
-    '(0.01, inf]': '#1A5490'
+    '(-inf, -0.05]': '#b32020ff',
+    '(-0.05, -0.025]': '#fa6f1fff',
+    '(-0.025, -0.01]': '#FDAE61',
+    '(-0.01, -0.005]': '#FEE08B',
+    '(-0.005, 0]': '#FFFFBF',
+    '(0, 0.005]': '#E6F5D0',
+    '(0.005, 0.01]': '#B8E186',
+    '(0.01, 0.025]': '#7FBC41',
+    '(0.025, 0.05]': '#4D9221',
+    '(0.05, inf]': '#1978deff'
 }
 
 (
     ggplot(
         (
             labour_processed_cutted.filter(
-                pl.col("YEAR") >= 2019,
-                pl.col("YEAR") <= 2025
+                pl.col("YEAR") >= FILTER_YEAR[0],
+                pl.col("YEAR") <= FILTER_YEAR[1]
             )
         ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"))
     + geom_tile(color='white')
@@ -202,5 +211,151 @@ color_mapping = {
     + theme_tufte()
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
     + scale_fill_manual(values=color_mapping, breaks=order)
+)
+```
+
+That looks great. The power of `scale_fill_manual` enables much more control over 
+the color palette. However, the cost was that it takes a lot more effort and lines of code
+to create a custom mapping. 
+
+## The legend
+
+...is extremely accurate, however we are going to simplify it and nicer to look at.
+
+First, let's move the legend to the top, and lay it out horizontally.
+
+
+```{python}
+(
+    ggplot(
+        (
+            labour_processed_cutted.filter(
+                pl.col("YEAR") >= FILTER_YEAR[0],
+                pl.col("YEAR") <= FILTER_YEAR[1]
+            )
+        ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"))
+    + geom_tile(color='white')
+    # + geom_point(shape="s")
+    + theme_tufte()
+    + theme(
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_x=element_text(angle=90),
+        legend_position="top",
+        legend_text_position='bottom',
+        legend_text=element_text(angle=90)
+    )
+    + scale_fill_manual(values=color_mapping, breaks=order)
+    + guides(fill=guide_legend(nrow=1))
+)
+```
+
+Now let's make the text more concise
+
+```{python}
+legend_labels = [
+    "   -5%",  # '(-inf, -0.01]',
+    "",  # '(-0.01, -0.0075]',
+    "  -1",  # '(-0.0075, -0.005]',
+    "",  # '(-0.005, -0.0025]',
+    "     0",  # '(-0.0025, 0]',
+    "",  # '(0, 0.0025]',
+    "",  # '(0.0025, 0.005]',
+    "1    ",  # '(0.005, 0.0075]',
+    "",  # '(0.0075, 0.01]',
+    "5%    ",  # '(0.01, inf]'
+]
+
+(
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+        ),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white")
+    + theme_tufte()
+    + theme(
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_x=element_text(angle=90),
+        legend_position="top",
+        legend_text_position="bottom",
+        legend_title_position="top",
+        legend_key_spacing=0,
+        legend_key_width=26,
+        legend_key_height=25,
+        legend_text=element_text(size=8),
+    )
+    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
+    + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
+)
+```
+
+In order to remove the whitespace, I discovered that the text needs to be smaller than
+the legend keys, otherwise they "push" the legend keys apart in uneven manner. So
+I made the legend text small, I also reduced the text, for example removing the
+"%" characters for `-0.50` and `0.50`. And finally, I increased the legend key size.
+
+I also "pushed" the text closer to the left or right of each box by adding whitespace, 
+so that the text is closer to the boundaries of each box, to make it more accurate.
+
+All these efforts and I think the legend is still not perfect.
+
+What if I create the legend manually as another plot, and then compose them together?
+
+
+## Axis 
+
+
+```{python}
+import mizani.labels as ml
+import textwrap
+
+# import mpl_fontkit as fk
+# fk.install("Playfair Display")
+# fk.install('Lato')
+FONT_PRIMARY = "Playfair Display"
+FONT_SECONDARY = "Lato"
+(
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+        ),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white", height=0.95)
+    + theme_tufte()
+    + theme(
+        text=element_text(family=FONT_PRIMARY),
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_y=element_text(family=FONT_SECONDARY),
+        axis_text_x=element_text(family=FONT_SECONDARY),
+        axis_title_y=element_text(weight=300),
+        legend_justification_right=1,
+        legend_position="right",
+        legend_text_position="right",
+        legend_title_position="top",
+        legend_key_spacing=0,
+        legend_key_width=15,
+        legend_key_height=15,
+        legend_text=element_text(size=8, family=FONT_SECONDARY),
+        legend_title=element_blank(),
+        plot_title=element_text(ha="left"),
+        plot_subtitle=element_text(ha="left", margin={"b": 1, "units": "lines"}),
+    )
+    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
+    + guides(fill=guide_legend(ncol=1, reverse=True))
+    + scale_x_datetime(
+        labels=ml.label_date("%Y"),  # Format labels to show only the year
+        expand=(0, 0),
+    )
+    + labs(
+        title="Sector Shifts: Where Canada's Jobs Are Moving",
+        subtitle=textwrap.fill(
+            "Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.",
+            width=75,
+        ),
+        x="",
+        y="< SECTORS FALLING            SECTORS RISING >",
+    )
 )
 ```
