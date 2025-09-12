@@ -15,12 +15,10 @@ You can install the development version of labourcan from [GitHub](https://githu
 pak::pak("wvictor14/labourcan")
 ```
 
-## Example
+## Render
 
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(labourcan)
-## basic example code
+```bash
+uv run quarto render /workspaces/labourcan/notebooks/labour.qmd
+uv run quarto render /workspaces/labourcan/notebooks/labour_deploy.qmd
 ```
 
