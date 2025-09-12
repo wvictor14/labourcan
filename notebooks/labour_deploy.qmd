@@ -29,10 +29,13 @@ FILTER_YEAR = (2018, 2025)
 import polars as pl
 import polars.selectors as cs
 from mizani.bounds import squish
+import mizani.labels as ml
+import mizani.breaks as mb
+import textwrap
 from pyprojroot import here
 from great_tables import GT, md, html
 from plotnine import *
-from labourcan.data_processing import read_labourcan,calculate_centered_rank,calculate_monthly_percent_change
+from labourcan.data_processing import read_labourcan,calculate_centered_rank
 ```
 
 ## Read data
@@ -137,14 +140,36 @@ using `scale_fill_manual`
 ### Bin with `polars.Series.cut`
 
 ```{python}
-labour_processed_cutted = labour_processed_cat.with_columns(
-    pl.col('PDIFF')
-    .cut([-0.05, -0.025, -0.01, -0.005, 0, 0.005, 0.01, 0.025, 0.05])
-    .alias('PDIFF_BINNED')
-).sort('PDIFF').with_columns(
-    pl.col('PDIFF_BINNED')
+labour_processed_cutted = (
+    labour_processed_cat.with_columns(
+        pl.col("PDIFF")
+        .cut(
+            [
+                -0.05,
+                -0.025,
+                -0.012,
+                -0.0080,
+                -0.0040,
+                0,
+                0.0040,
+                0.0080,
+                0.012,
+                0.025,
+                0.05,
+            ]
+        )
+        .alias("PDIFF_BINNED")
+    )
+    .with_columns(
+        pl.when(pl.col("PDIFF") == 0)
+        .then(pl.lit("0"))
+        .otherwise(pl.col("PDIFF_BINNED"))
+        .alias("PDIFF_BINNED")
+    )
+    .sort("PDIFF")
+    .with_columns(pl.col("PDIFF_BINNED"))
 )
-labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
+labour_processed_cutted.group_by("PDIFF_BINNED").len()
 ```
 
 ```{python}
@@ -152,10 +177,11 @@ labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
     ggplot(
         (
             labour_processed_cutted.filter(
-                pl.col("YEAR") >= FILTER_YEAR[0],
-                pl.col("YEAR") <= FILTER_YEAR[1]
+                pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
             )
-        ), aes(x="DATE_YMD", y="centered_rank_cat", fill="PDIFF_BINNED"))
+        ),
+        aes(x="DATE_YMD", y="centered_rank_cat", fill="PDIFF_BINNED"),
+    )
     + geom_tile(height=0.95)  # whitespace between tiles, vertically
     + theme_tufte()
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
@@ -166,47 +192,48 @@ labour_processed_cutted.select(cs.contains('PDIFF')).sample(8)
 
 Now we need to order the levels, and map explicit colors
 
-```{python}
+We will make PDIFF=0% to be gray, positive values to have a green and blue colors (job growth = good), and negative values to have warmer (alarming, bad) colors.
 
+```{python}
 order = (
-    labour_processed_cutted
-    .drop_nulls()
-    .sort('PDIFF')
-    .select(pl.col('PDIFF_BINNED'))
+    labour_processed_cutted.drop_nulls()
+    .sort("PDIFF")
+    .select(pl.col("PDIFF_BINNED"))
     .unique(maintain_order=True)
     .to_series()
     .to_list()
 )
 
-labour_processed_cutted_ordered = (
-    labour_processed_cutted
-    .with_columns(
-        pl.col('PDIFF_BINNED').cast(pl.Enum(order))
-    )
+labour_processed_cutted_ordered = labour_processed_cutted.with_columns(
+    pl.col("PDIFF_BINNED").cast(pl.Enum(order))
 )
 
 color_mapping = {
-    '(-inf, -0.05]': '#b32020ff',
-    '(-0.05, -0.025]': '#fa6f1fff',
-    '(-0.025, -0.01]': '#FDAE61',
-    '(-0.01, -0.005]': '#FEE08B',
-    '(-0.005, 0]': '#FFFFBF',
-    '(0, 0.005]': '#E6F5D0',
-    '(0.005, 0.01]': '#B8E186',
-    '(0.01, 0.025]': '#7FBC41',
-    '(0.025, 0.05]': '#4D9221',
-    '(0.05, inf]': '#1978deff'
+    "(-inf, -0.05]": "#d82828ff",
+    "(-0.05, -0.025]": "#fa6f1fff",
+    "(-0.025, -0.012]": "#f1874aff",
+    "(-0.012, -0.008]": "#f1b274ff",
+    "(-0.008, -0.004]": "#FEE08B",
+    "(-0.004, 0]": "#FFFFBF",
+    "0": "#a8a8a8ff",
+    "(0, 0.004]": "#E6F5D0",
+    "(0.004, 0.008]": "#bce091ff",
+    "(0.008, 0.012]": "#9ad65fff",
+    "(0.012, 0.025]": "#78b552ff",
+    "(0.025, 0.05]": "#5cb027ff",
+    "(0.05, inf]": "#1f6fc6ff",
 }
 
 (
     ggplot(
         (
             labour_processed_cutted.filter(
-                pl.col("YEAR") >= FILTER_YEAR[0],
-                pl.col("YEAR") <= FILTER_YEAR[1]
+                pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
             )
-        ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"))
-    + geom_tile(color='white')
+        ),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white")
     # + geom_point(shape="s")
     + theme_tufte()
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
@@ -222,47 +249,23 @@ to create a custom mapping.
 
 ...is extremely accurate, however we are going to simplify it and nicer to look at.
 
-First, let's move the legend to the top, and lay it out horizontally.
-
-
-```{python}
-(
-    ggplot(
-        (
-            labour_processed_cutted.filter(
-                pl.col("YEAR") >= FILTER_YEAR[0],
-                pl.col("YEAR") <= FILTER_YEAR[1]
-            )
-        ), aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"))
-    + geom_tile(color='white')
-    # + geom_point(shape="s")
-    + theme_tufte()
-    + theme(
-        figure_size=FIGURE_THEME_SIZE,
-        axis_text_x=element_text(angle=90),
-        legend_position="top",
-        legend_text_position='bottom',
-        legend_text=element_text(angle=90)
-    )
-    + scale_fill_manual(values=color_mapping, breaks=order)
-    + guides(fill=guide_legend(nrow=1))
-)
-```
-
-Now let's make the text more concise
+First let's make the text more concise: we don't need every bin to be labelled, and instead of listing the range, we can just describe the midpoint.
 
 ```{python}
 legend_labels = [
-    "   -5%",  # '(-inf, -0.01]',
-    "",  # '(-0.01, -0.0075]',
-    "  -1",  # '(-0.0075, -0.005]',
-    "",  # '(-0.005, -0.0025]',
-    "     0",  # '(-0.0025, 0]',
-    "",  # '(0, 0.0025]',
-    "",  # '(0.0025, 0.005]',
-    "1    ",  # '(0.005, 0.0075]',
-    "",  # '(0.0075, 0.01]',
-    "5%    ",  # '(0.01, inf]'
+    "-5%",  # the ends can be labelled with the boundary e.g. implies <-5%
+    "",
+    "",
+    "-1%",
+    "",
+    "",
+    "No change",
+    "",
+    "",
+    "",
+    "1%",
+    "",
+    "5%",
 ]
 
 (
@@ -277,44 +280,43 @@ legend_labels = [
     + theme(
         figure_size=FIGURE_THEME_SIZE,
         axis_text_x=element_text(angle=90),
-        legend_position="top",
-        legend_text_position="bottom",
-        legend_title_position="top",
+        legend_justification_right=1,
+        legend_position="right",
+        legend_text_position="right",
+        legend_title=element_blank(),
         legend_key_spacing=0,
-        legend_key_width=26,
-        legend_key_height=25,
+        legend_key_width=10,
+        legend_key_height=10,
         legend_text=element_text(size=8),
     )
     + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
-    + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
 )
 ```
 
-In order to remove the whitespace, I discovered that the text needs to be smaller than
-the legend keys, otherwise they "push" the legend keys apart in uneven manner. So
-I made the legend text small, I also reduced the text, for example removing the
-"%" characters for `-0.50` and `0.50`. And finally, I increased the legend key size.
+Looks much better than my first attempt with a [horizontal legend](#horizontal-legend-with-horizontal-legend-text)
 
-I also "pushed" the text closer to the left or right of each box by adding whitespace, 
-so that the text is closer to the boundaries of each box, to make it more accurate.
+## Text and fonts
 
-All these efforts and I think the legend is still not perfect.
+Next up is the text and fonts. I played with a few fonts on [google fonts](https://fonts.google.com/) before settling on two. 
 
-What if I create the legend manually as another plot, and then compose them together?
+First, install the fonts:
 
+```{python}
+FONT_PRIMARY = "Playfair Display"
+FONT_SECONDARY = "Lato"
+import mpl_fontkit as fk
+fk.install(FONT_PRIMARY)
+fk.install(FONT_SECONDARY)
+```
 
-## Axis 
+plotnine breaks and labels for the scales can be easily adjusted using `mizani`, which is like the `scales` equivalent to `ggplot2`
 
+We're going to use `mizani.breaks.breaks_date_width` to put breaks for each year, and `mizani.labels.label_date` to drop the "month" part of the date. 
 
 ```{python}
 import mizani.labels as ml
-import textwrap
+import mizani.breaks as mb
 
-# import mpl_fontkit as fk
-# fk.install("Playfair Display")
-# fk.install('Lato')
-FONT_PRIMARY = "Playfair Display"
-FONT_SECONDARY = "Lato"
 (
     ggplot(
         labour_processed_cutted.filter(
@@ -347,6 +349,7 @@ FONT_SECONDARY = "Lato"
     + scale_x_datetime(
         labels=ml.label_date("%Y"),  # Format labels to show only the year
         expand=(0, 0),
+        breaks=mb.breaks_date_width("1 years"),
     )
     + labs(
         title="Sector Shifts: Where Canada's Jobs Are Moving",
@@ -357,5 +360,43 @@ FONT_SECONDARY = "Lato"
         x="",
         y="< SECTORS FALLING            SECTORS RISING >",
     )
+)
+```
+
+# Appendix
+
+## Things that didn't work
+
+### Horizontal legend with horizontal legend text
+
+Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they "push" the legend keys apart in uneven manner. I attempted to unsuccesfully address this by making the legend text small, eliminating as much text as possible (e.g. removing the "%" characters for `-0.50` and `0.50`), and lastly increasing the legend key size. 
+
+But it still didn't really work out the way I hoped, so I stuck with a vertical legend instead.
+
+```{python}
+#| echo: false
+(
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+        ),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white")
+    + theme_tufte()
+    + theme(
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_x=element_text(angle=90),
+        legend_justification_right=1,
+        legend_position="top",
+        legend_text_position="bottom",
+        legend_title_position="top",
+        legend_key_spacing=0,
+        legend_key_width=10,
+        legend_key_height=10,
+        legend_text=element_text(size=8),
+    )
+    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
+    + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
 )
 ```
