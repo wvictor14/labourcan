@@ -2,15 +2,25 @@ project:
   type: website
 
 website:
-  title: "today"
   navbar:
+    search: false
+    title: false
     left:
       - href: 03_labour_main.qmd
-        text: Home
-      - href: 02_develop_visualization.qmd
-        text: Visualization
-      - href: 01_develop_data_processing.qmd
-        text: Data Processing
+        text: "Canada Employment Tracker"
+      - sidebar:how
+    tools:
+      - icon: github
+        menu:
+          - text: Source Code
+            href:  github.com/wvictor14/labourcan
+  sidebar:
+    - id: how
+      title: "How"
+      style: "docked"
+      contents:
+        - 02_develop_visualization.qmd
+        - 01_develop_data_processing.qmd
 
 format:
   html:
