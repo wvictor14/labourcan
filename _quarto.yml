@@ -1,0 +1,19 @@
+project:
+  type: website
+
+website:
+  title: "today"
+  navbar:
+    left:
+      - href: 03_labour_main.qmd
+        text: Home
+      - href: 02_develop_visualization.qmd
+        text: Visualization
+      - href: 01_develop_data_processing.qmd
+        text: Data Processing
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
