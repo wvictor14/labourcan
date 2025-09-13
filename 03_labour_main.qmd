@@ -4,6 +4,7 @@ format:
   html:
     toc: false
     embed-resources: false
+    fig-align: center
 jupyter: python3
 editor: 
   render-on-save: true
@@ -28,6 +29,7 @@ FILTER_YEAR = (2018, 2025)
 BRAND = Brand.from_yaml(here())
 FONT_PRIMARY = BRAND.typography.base.model_dump()['family']
 FONT_SECONDARY = 'Lato'
+fk.install(FONT_PRIMARY)
 fk.install(FONT_SECONDARY)
 COLOR_BACKGROUND = BRAND.color.background
 ```
