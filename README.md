@@ -18,7 +18,7 @@ pak::pak("wvictor14/labourcan")
 ## Render
 
 ```bash
-uv run quarto render /workspaces/labourcan/notebooks/labour.qmd
-uv run quarto render /workspaces/labourcan/notebooks/labour_deploy.qmd
+uv run quarto preview
+uv run quarto render
 ```
 
