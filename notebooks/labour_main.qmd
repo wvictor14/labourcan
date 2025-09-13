@@ -1,0 +1,145 @@
+---
+title: "Track Canada's Labour Statistics"
+format: 
+  html:
+    toc: true
+    embed-resources: true
+jupyter: python3
+editor: 
+  render-on-save: true
+execute: 
+  echo: false
+---
+
+# Setup {.hidden .unlisted}
+
+## Parameters
+
+```{python}
+from pyprojroot import here
+import mpl_fontkit as fk
+```
+```{python}
+#| tags: [parameters]
+LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
+FIGURE_THEME_SIZE = (8, 6)
+FILTER_YEAR = (2018, 2025)
+FONT_PRIMARY = "Playfair Display"
+FONT_SECONDARY = "Lato"
+
+fk.install(FONT_PRIMARY)
+fk.install(FONT_SECONDARY)
+```
+
+## Libraries
+
+```{python}
+import polars as pl
+import polars.selectors as cs
+from mizani.bounds import squish
+import mizani.labels as ml
+import mizani.breaks as mb
+import textwrap
+from pyprojroot import here
+from great_tables import GT, md, html
+from plotnine import *
+from labourcan.data_processing import (
+    read_labourcan,
+    calculate_centered_rank,
+    cut_pdiff,
+    DEFAULT_CUTS
+)
+```
+
+## Data
+
+```{python}
+labour = read_labourcan(LABOUR_DATA_FILE)
+labour_processed = calculate_centered_rank(labour)
+labour_processed_cutted = cut_pdiff(labour_processed, DEFAULT_CUTS)
+plot_data = labour_processed_cutted.filter(
+    pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+)
+
+COLOR_MAPPING = {
+    "(-inf, -0.05]": "#d82828ff",
+    "(-0.05, -0.025]": "#fa6f1fff",
+    "(-0.025, -0.012]": "#f1874aff",
+    "(-0.012, -0.008]": "#f1b274ff",
+    "(-0.008, -0.004]": "#FEE08B",
+    "(-0.004, 0]": "#FFFFBF",
+    "0": "#a8a8a8ff",
+    "(0, 0.004]": "#E6F5D0",
+    "(0.004, 0.008]": "#bce091ff",
+    "(0.008, 0.012]": "#9ad65fff",
+    "(0.012, 0.025]": "#78b552ff",
+    "(0.025, 0.05]": "#5cb027ff",
+    "(0.05, inf]": "#1f6fc6ff",
+}
+LEGEND_LABELS = [
+    "-5%",
+    "",
+    "",
+    "-1%",
+    "",
+    "",
+    "No change",
+    "",
+    "",
+    "",
+    "1%",
+    "",
+    "5%",
+]
+```
+
+
+#
+
+
+```{python}
+plot = (
+    ggplot(
+        plot_data,
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white", height=0.95)
+    + theme_tufte()
+    + theme(
+        text=element_text(family=FONT_PRIMARY),
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_y=element_text(family=FONT_SECONDARY),
+        axis_text_x=element_text(family=FONT_SECONDARY),
+        axis_title_y=element_text(weight=300),
+        legend_justification_right=1,
+        legend_position="right",
+        legend_text_position="right",
+        legend_title_position="top",
+        legend_key_spacing=0,
+        legend_key_width=15,
+        legend_key_height=15,
+        legend_text=element_text(size=8, family=FONT_SECONDARY),
+        legend_title=element_blank(),
+        plot_title=element_text(ha="left"),
+        plot_subtitle=element_text(
+            ha="left", margin={"b": 1, "units": "lines"}),
+    )
+    + scale_fill_manual(values=COLOR_MAPPING, labels=LEGEND_LABELS)
+    + guides(fill=guide_legend(ncol=1, reverse=True))
+    + scale_x_datetime(
+        labels=ml.label_date("%Y"),  # Format labels to show only the year
+        expand=(0, 0),
+        breaks=mb.breaks_date_width("1 years"),
+    )
+    + labs(
+        title="Sector Shifts: Where Canada's Jobs Are Moving",
+        subtitle=textwrap.fill(
+            "Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.",
+            width=75,
+        ),
+        x="",
+        y="< SECTORS FALLING            SECTORS RISING >",
+    )
+)
+plot
+```
