@@ -5,12 +5,13 @@
 Thumbs.db # Windows specific
 .vscode/ # VS Code specific
 
-# qmd artifacts
+# quarto artifacts
 *.html
 *.pdf
 *.knit.md
 *.utf8.md
 *.tex
+_site
 
 # data
 data/14100022.csv
@@ -26,3 +27,4 @@ dist/
 
 libs/
 figure-html
+/.quarto/
