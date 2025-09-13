@@ -12,6 +12,7 @@ Thumbs.db # Windows specific
 *.utf8.md
 *.tex
 _site
+*_ipynb
 
 # data
 data/14100022.csv
