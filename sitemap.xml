@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://wvictor14.github.io/labourcan/01_develop_data_processing.html</loc>
-    <lastmod>2025-09-13T04:30:57.118Z</lastmod>
-  </url>
-  <url>
     <loc>https://wvictor14.github.io/labourcan/03_labour_main.html</loc>
-    <lastmod>2025-09-13T04:52:52.087Z</lastmod>
+    <lastmod>2025-09-13T05:47:58.135Z</lastmod>
   </url>
   <url>
     <loc>https://wvictor14.github.io/labourcan/02_develop_visualization.html</loc>
-    <lastmod>2025-09-13T04:44:58.727Z</lastmod>
+    <lastmod>2025-09-13T05:47:58.135Z</lastmod>
+  </url>
+  <url>
+    <loc>https://wvictor14.github.io/labourcan/01_develop_data_processing.html</loc>
+    <lastmod>2025-09-13T05:47:58.135Z</lastmod>
   </url>
 </urlset>
