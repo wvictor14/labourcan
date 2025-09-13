@@ -17,6 +17,7 @@ requires-python = ">=3.13"
 dependencies = [
     "great-tables>=0.18.0",
     "ipykernel>=6.30.1",
+    "jupyter>=1.1.1",
     "mizani>=0.14.2",
     "mpl-fontkit>=0.5.1",
     "nbclient>=0.10.2",

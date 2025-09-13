@@ -29,6 +29,13 @@ jobs:
       - name: Install the project
         run: uv sync --locked --all-extras --dev
 
+      - name: Install Python dependencies
+        run: |
+          uv add pyyaml
+          uv add jupyter
+          # Add any other Python packages your notebook needs
+          # pip install pandas matplotlib seaborn etc.
+
       - name: Activate Python virtual environment
         run: |
           source .venv/bin/activate
