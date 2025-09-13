@@ -24,21 +24,13 @@ jobs:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v6  
+        with:
+          activate-environment: true
+      - run: uv add jupyter pyyaml
         
       - name: Install the project
         run: uv sync --locked --all-extras --dev
-
-      - name: Install Python dependencies
-        run: |
-          uv add pyyaml
-          uv add jupyter
-          # Add any other Python packages your notebook needs
-          # pip install pandas matplotlib seaborn etc.
-
-      - name: Activate Python virtual environment
-        run: |
-          source .venv/bin/activate
       
       - name: Render and Publish
         uses: quarto-dev/quarto-actions/publish@v2
