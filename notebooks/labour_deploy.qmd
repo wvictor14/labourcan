@@ -55,7 +55,7 @@ labour = read_labourcan(LABOUR_DATA_FILE)
 labour_processed = calculate_centered_rank(labour)
 ```
 
-# Visualization
+# Heatmap of Employment Numbers
 
 Let's take a stab at a first visual. 
 
@@ -317,7 +317,7 @@ We're going to use `mizani.breaks.breaks_date_width` to put breaks for each year
 import mizani.labels as ml
 import mizani.breaks as mb
 
-(
+plot = (
     ggplot(
         labour_processed_cutted.filter(
             pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
@@ -342,9 +342,11 @@ import mizani.breaks as mb
         legend_text=element_text(size=8, family=FONT_SECONDARY),
         legend_title=element_blank(),
         plot_title=element_text(ha="left"),
-        plot_subtitle=element_text(ha="left", margin={"b": 1, "units": "lines"}),
+        plot_subtitle=element_text(
+            ha="left", margin={"b": 1, "units": "lines"}),
     )
-    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
+    + scale_fill_manual(values=color_mapping,
+                        breaks=order, labels=legend_labels)
     + guides(fill=guide_legend(ncol=1, reverse=True))
     + scale_x_datetime(
         labels=ml.label_date("%Y"),  # Format labels to show only the year
@@ -361,15 +363,39 @@ import mizani.breaks as mb
         y="< SECTORS FALLING            SECTORS RISING >",
     )
 )
+plot
 ```
+
+## Highlighting an Industry
+
+For more deeper insights, I would like to see where each individual ranks in the graphic.
+
+```{python}
+labour_processed_cutted.select('Industry').unique().to_series().to_list()
+INDUSTRY = 'Wholesale and retail trade [41, 44-45]'
+
+plot_data_subsetted = labour_processed_cutted.filter(
+    pl.col("YEAR") >= FILTER_YEAR[0],
+    pl.col("YEAR") <= FILTER_YEAR[1],
+    pl.col('Industry') == INDUSTRY
+)
+(
+    plot
+    + geom_point(data=plot_data_subsetted, color='black', fill='black')
+)
+```
+
+# Line plot of unemployment
 
 # Appendix
 
 ## Things that didn't work
 
+This section is a non-exhaustive list of design elements I wasn't able to solve with `plotnine`
+
 ### Horizontal legend with horizontal legend text
 
-Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they "push" the legend keys apart in uneven manner. I attempted to unsuccesfully address this by making the legend text small, eliminating as much text as possible (e.g. removing the "%" characters for `-0.50` and `0.50`), and lastly increasing the legend key size. 
+Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they "push" the legend keys apart in uneven manner. I attempted to (*unsuccesfully*) address this by making the legend text small, eliminating as much text as possible (e.g. removing the "%" characters for `-0.50` and `0.50`), and lastly increasing the legend key size. 
 
 But it still didn't really work out the way I hoped, so I stuck with a vertical legend instead.
 
@@ -396,7 +422,8 @@ But it still didn't really work out the way I hoped, so I stuck with a vertical 
         legend_key_height=10,
         legend_text=element_text(size=8),
     )
-    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
+    + scale_fill_manual(values=color_mapping,
+                        breaks=order, labels=legend_labels)
     + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
 )
 ```
