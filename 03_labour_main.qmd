@@ -2,8 +2,8 @@
 title: "Track Canada's Labour Statistics"
 format: 
   html:
-    toc: true
-    embed-resources: true
+    toc: false
+    embed-resources: false
 jupyter: python3
 editor: 
   render-on-save: true
