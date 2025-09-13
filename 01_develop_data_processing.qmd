@@ -1,5 +1,5 @@
 ---
-title: "Exploring Labour data"
+title: "Processing StatCan Data"
 format: 
   html:
     toc: true

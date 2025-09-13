@@ -1,5 +1,5 @@
 ---
-title: "Exploring Labour data"
+title: "Developing the employment heatmap visualization"
 format: 
   html:
     toc: true
