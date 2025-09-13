@@ -18,37 +18,37 @@ execute:
 ```{python}
 from pyprojroot import here
 import mpl_fontkit as fk
+from brand_yml import Brand
 ```
 ```{python}
-#| tags: [parameters]
+# | tags: [parameters]
 LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
-FIGURE_THEME_SIZE = (8, 6)
+FIGURE_THEME_SIZE = (11.5, 5)
 FILTER_YEAR = (2018, 2025)
-FONT_PRIMARY = "Playfair Display"
-FONT_SECONDARY = "Lato"
-
-fk.install(FONT_PRIMARY)
+BRAND = Brand.from_yaml(here())
+FONT_PRIMARY = BRAND.typography.base.model_dump()['family']
+FONT_SECONDARY = 'Lato'
 fk.install(FONT_SECONDARY)
+COLOR_BACKGROUND = BRAND.color.background
 ```
 
 ## Libraries
 
 ```{python}
-import polars as pl
-import polars.selectors as cs
-from mizani.bounds import squish
-import mizani.labels as ml
-import mizani.breaks as mb
-import textwrap
-from pyprojroot import here
-from great_tables import GT, md, html
-from plotnine import *
 from labourcan.data_processing import (
     read_labourcan,
     calculate_centered_rank,
     cut_pdiff,
     DEFAULT_CUTS
 )
+import polars as pl
+import polars.selectors as cs
+from mizani.bounds import squish
+import mizani.labels as ml
+import mizani.breaks as mb
+import textwrap
+from great_tables import GT, md, html
+from plotnine import *
 ```
 
 ## Data
@@ -94,10 +94,12 @@ LEGEND_LABELS = [
 ```
 
 
-#
+# Sector Shifts: Where Canada's Jobs Are Moving
 
+Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.
 
 ```{python}
+# | column: screen
 plot = (
     ggplot(
         plot_data,
@@ -123,6 +125,8 @@ plot = (
         plot_title=element_text(ha="left"),
         plot_subtitle=element_text(
             ha="left", margin={"b": 1, "units": "lines"}),
+        plot_background=element_rect(
+            fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
     )
     + scale_fill_manual(values=COLOR_MAPPING, labels=LEGEND_LABELS)
     + guides(fill=guide_legend(ncol=1, reverse=True))
@@ -132,11 +136,11 @@ plot = (
         breaks=mb.breaks_date_width("1 years"),
     )
     + labs(
-        title="Sector Shifts: Where Canada's Jobs Are Moving",
-        subtitle=textwrap.fill(
-            "Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.",
-            width=75,
-        ),
+        # title="Sector Shifts: Where Canada's Jobs Are Moving",
+        # subtitle=textwrap.fill(
+        #     "Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.",
+        #     width=75,
+        # ),
         x="",
         y="< SECTORS FALLING            SECTORS RISING >",
     )
