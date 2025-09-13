@@ -1,28 +1,11 @@
-*Rproj
-
-# History files
-.Rhistory
-.Rapp.history
-
-# Session data
-.RData
-
-# RStudio files
-.Rproj.user/
-
-# R package build artifacts
-.Rinstignore
-*.Rcheck/
 *.tar.gz
 *.zip
 *.log
-
-# R package development files
 .DS_Store # macOS specific
 Thumbs.db # Windows specific
 .vscode/ # VS Code specific
 
-# R markdown artifacts
+# qmd artifacts
 *.html
 *.pdf
 *.knit.md
@@ -40,3 +23,6 @@ __pycache__/
 *pyo
 build/
 dist/
+
+libs/
+figure-html
