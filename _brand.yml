@@ -1,0 +1,19 @@
+color:
+  palette:
+    black: "#1A1A1A"
+    white: "#F9F9F9"
+  background: white
+  foreground: dark-grey
+  primary: black
+
+typography:
+  fonts:
+    - family: Playfair Display
+      source: google
+    - family: Lato
+      source: google
+    - family: Fira Code
+      source: bunny
+  base: Playfair Display
+  headings: Playfair Display
+  monospace: Fira Code
