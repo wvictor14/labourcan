@@ -1,6 +1,6 @@
 import polars as pl
 from pathlib import Path
-from typing import Union
+from typing import Union, Sequence
 import polars.selectors as cs
 from pyprojroot import here
 
@@ -26,7 +26,8 @@ def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
     Example:
         >>> df = read_labourcan("data/14100022.csv")
         >>> print(df.columns)
-        ['REF_DATE', 'GEO', 'Statistics', 'Data type', 'VALUE', 'YEAR', 'MONTH', 'DATE_YMD']
+        ['REF_DATE', 'GEO', 'Statistics', 'Data type',
+            'VALUE', 'YEAR', 'MONTH', 'DATE_YMD']
 
     Note:
         - Only keeps rows where Statistics == 'Estimate' and Data type == 'Seasonally adjusted'
@@ -99,14 +100,14 @@ def calculate_centered_rank(
     Returns:
         pl.DataFrame: DataFrame with monthly changes and centered ranks, including:
             - All columns from calculate_monthly_percent_change()
-            - New ranking column "centered_rank_across_industry" showing relative performance 
+            - New ranking column "centered_rank_across_industry" showing relative performance
               within each time period
 
     Interpretation of Ranks:
         - Rank 0: No change (PDIFF ≈ 0)
         - Negative ranks: Below-average performance (decreases)
             - Rank -1: Worst performer (largest decrease)
-        - Positive ranks: Above-average performance (increases)  
+        - Positive ranks: Above-average performance (increases)
             - Rank 1: Best performer among those with increase
     """
     intermediate = calculate_monthly_percent_change(df)
@@ -130,10 +131,10 @@ def calculate_monthly_percent_change(
 
     Args:
         df (pl.DataFrame): Input DataFrame containing labour data with columns:
-            - group_by column (default "Industry")  
+            - group_by column (default "Industry")
             - value_col (default "VALUE")
             - "YEAR", "MONTH", "DATE_YMD" for time sorting
-        group_by (str): Column name to group by when calculating changes. 
+        group_by (str): Column name to group by when calculating changes.
             Defaults to "Industry"
 
     Returns:
@@ -143,7 +144,7 @@ def calculate_monthly_percent_change(
             - PDIFF: Percentage difference ((current - previous) / previous)
 
     Note:
-        - First observation for each group will have null values for LAGGED_VALUE, 
+        - First observation for each group will have null values for LAGGED_VALUE,
           DIFF, and PDIFF since there's no previous month to compare against
         - Percentage changes are in decimal format (0.05 = 5% increase)
         - Negative PDIFF values indicate month-over-month decreases
@@ -224,6 +225,61 @@ def centered_rank_expr(col: pl.Expr) -> pl.Expr:
         .then(col.rank(method="ordinal") - (col < 0).sum())
         .otherwise(pl.lit(None))  # Handle null values
     )
+
+
+DEFAULT_CUTS = [
+    -0.05, -0.025, -0.012, -0.008, -0.004,
+    0,
+    0.004, 0.008, 0.012, 0.025, 0.05,
+]
+
+
+def cut_pdiff(
+    df: pl.DataFrame,
+    cuts: Sequence[float] = DEFAULT_CUTS
+) -> pl.DataFrame:
+    """
+    Apply percentage difference cuts to a DataFrame.
+
+    Args:
+        df: Input DataFrame
+        cuts: Sequence of cut points for percentage differences.
+              Defaults to symmetric cuts around 0. If None, uses default symmetric cuts
+              around zero from -5% to +5%
+
+    Returns:
+        DataFrame with applied cuts
+    """
+    out = (
+        df.with_columns(
+            pl.col("PDIFF")
+            .cut(cuts)
+            .alias("PDIFF_BINNED")
+        )
+        .with_columns(
+            pl.when(pl.col("PDIFF") == 0)
+            .then(pl.lit("0"))
+            .otherwise(pl.col("PDIFF_BINNED"))
+            .alias("PDIFF_BINNED")
+        )
+        .sort("PDIFF")
+        .with_columns(pl.col("PDIFF_BINNED"))
+    )
+
+    order = (
+        out.drop_nulls()
+        .sort("PDIFF")
+        .select(pl.col("PDIFF_BINNED"))
+        .unique(maintain_order=True)
+        .to_series()
+        .to_list()
+    )
+
+    out = out.with_columns(
+        pl.col("PDIFF_BINNED").cast(pl.Enum(order))
+    )
+
+    return out
 
 
 def main() -> pl.DataFrame:
