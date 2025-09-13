@@ -48,7 +48,7 @@ from labourcan.data_processing import read_labourcan,calculate_centered_rank
 - Additional `YEAR`, `MONTH`, and `DATE_YMD` columns extracted from `REF_DATE`
 - Sorted chronologically by year and month
 
-See [notebooks/labour.qmd](../notebooks/labour.qmd) for details on data processing.
+See [labour.qmd](02_develop_data_processing.html) for details on data processing.
 
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
