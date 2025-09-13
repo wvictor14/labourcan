@@ -21,9 +21,3 @@ website:
       contents:
         - 02_develop_visualization.qmd
         - 01_develop_data_processing.qmd
-
-format:
-  html:
-    theme: cosmo
-    css: styles.css
-    toc: true
