@@ -2,9 +2,10 @@ color:
   palette:
     black: "#1A1A1A"
     white: "#F9F9F9"
+    red: "#da161f"
   background: white
-  foreground: dark-grey
-  primary: black
+  foreground: black
+  primary: red
 
 typography:
   fonts:
@@ -17,3 +18,7 @@ typography:
   base: Playfair Display
   headings: Playfair Display
   monospace: Fira Code
+
+defaults:
+  bootstrap:
+    navbar-bg: $brand-white
