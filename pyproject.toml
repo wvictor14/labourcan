@@ -29,4 +29,5 @@ dependencies = [
     "pyarrow>=21.0.0",
     "pyprojroot>=0.3.0",
     "pyyaml>=6.0.2",
+    "quarto-cli>=1.8.24",
 ]
