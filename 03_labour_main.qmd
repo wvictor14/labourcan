@@ -5,6 +5,51 @@ format:
     toc: false
     embed-resources: false
     fig-align: center
+include-in-header:
+  - text: |
+      <style>
+      .panel-tabset {
+          display: grid;
+          grid-gap: 0.8em;
+          grid-template-columns: 15% 85%;
+      }
+
+      .panel-tabset-tabby {
+          border: none !important;
+          text-align: right;
+      }
+
+      h3 {
+          margin-top: 0;
+      }
+
+      .nav-tabs {
+          display: flex !important;
+          flex-direction: column !important;
+          flex-wrap: nowrap !important;
+          border: none !important;
+          text-align: right;
+      }
+
+      .nav-item {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 0.5rem !important;
+          flex: none !important;
+      }
+
+      .nav-link {
+          font-size: 0.8rem !important;
+          text-align: right !important;
+          padding: 0 !important;
+          line-height: 1.2 !important;
+          white-space: normal !important;
+      }
+      .tab-content {
+        border: none;
+      }
+
+      </style>
 jupyter: python3
 editor: 
   render-on-save: true
@@ -24,11 +69,11 @@ from brand_yml import Brand
 ```{python}
 # | tags: [parameters]
 LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
-FIGURE_THEME_SIZE = (11.5, 5)
+FIGURE_THEME_SIZE = (10, 5)
 FILTER_YEAR = (2018, 2025)
 BRAND = Brand.from_yaml(here())
-FONT_PRIMARY = BRAND.typography.base.model_dump()['family']
-FONT_SECONDARY = 'Lato'
+FONT_PRIMARY = BRAND.typography.base.model_dump()["family"]
+FONT_SECONDARY = "Lato"
 fk.install(FONT_PRIMARY)
 fk.install(FONT_SECONDARY)
 COLOR_BACKGROUND = BRAND.color.background
@@ -51,6 +96,9 @@ import mizani.breaks as mb
 import textwrap
 from great_tables import GT, md, html
 from plotnine import *
+from IPython.display import display, Markdown
+import matplotlib.pyplot as plt
+import re
 ```
 
 ## Data
@@ -100,8 +148,12 @@ LEGEND_LABELS = [
 
 Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.
 
+::: {.panel-tabset .nav-pills .column-screen-inset}
+
+### flag
+
 ```{python}
-# | column: page
+# | output: asis
 plot = (
     ggplot(
         plot_data,
@@ -125,10 +177,8 @@ plot = (
         legend_text=element_text(size=8, family=FONT_SECONDARY),
         legend_title=element_blank(),
         plot_title=element_text(ha="left"),
-        plot_subtitle=element_text(
-            ha="left", margin={"b": 1, "units": "lines"}),
-        plot_background=element_rect(
-            fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+        plot_subtitle=element_text(ha="left", margin={"b": 1, "units": "lines"}),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
     )
     + scale_fill_manual(values=COLOR_MAPPING, labels=LEGEND_LABELS)
     + guides(fill=guide_legend(ncol=1, reverse=True))
@@ -138,14 +188,25 @@ plot = (
         breaks=mb.breaks_date_width("1 years"),
     )
     + labs(
-        # title="Sector Shifts: Where Canada's Jobs Are Moving",
-        # subtitle=textwrap.fill(
-        #     "Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.",
-        #     width=75,
-        # ),
         x="",
         y="< SECTORS FALLING            SECTORS RISING >",
     )
 )
 plot
 ```
+
+```{python}
+# | output: asis
+ALL_INDUSTRIES = (
+    labour_processed_cutted.select("Industry").unique().to_series().to_list()
+)
+
+for INDUSTRY in ALL_INDUSTRIES:
+    display(Markdown(f"### {re.sub(r' \[.*?\]$', '', INDUSTRY)}"))
+    plot_data_subsetted = plot_data.filter(pl.col("Industry") == INDUSTRY)
+    p = plot + geom_point(data=plot_data_subsetted, color="black", fill="black")
+    p.show()
+    display(Markdown(f" "))
+```
+
+:::
