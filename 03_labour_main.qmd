@@ -101,7 +101,7 @@ LEGEND_LABELS = [
 Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.
 
 ```{python}
-# | column: screen
+# | column: page
 plot = (
     ggplot(
         plot_data,
