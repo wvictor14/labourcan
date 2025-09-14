@@ -1,5 +1,10 @@
 ---
 title: "Track Canada's Labour Statistics"
+author: "Victor Yuan"
+date: today
+date-modified: today
+language:
+  title-block-modified: "Last Updated"
 format: 
   html:
     toc: false
