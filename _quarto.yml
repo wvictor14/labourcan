@@ -17,7 +17,8 @@ website:
   sidebar:
     - id: how
       title: "How"
-      style: "docked"
+      style: "floating"
       contents:
         - 02_develop_visualization.qmd
         - 01_develop_data_processing.qmd
+      alignment: center
