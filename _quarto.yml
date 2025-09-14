@@ -6,7 +6,7 @@ website:
     search: false
     title: false
     left:
-      - href: 03_labour_main.qmd
+      - href: index.qmd
         text: "Canada Employment Tracker"
       - sidebar:how
     tools:
