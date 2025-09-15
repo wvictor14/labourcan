@@ -10,10 +10,10 @@ website:
         text: "Canada Employment Tracker"
       - sidebar:how
     tools:
+      - icon: linkedin
+        href:  linkedin.com/in/victor2wy/
       - icon: github
-        menu:
-          - text: Source Code
-            href:  github.com/wvictor14/labourcan
+        href:  github.com/wvictor14/labourcan/
   sidebar:
     - id: how
       title: "How"
