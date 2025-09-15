@@ -105,7 +105,22 @@ import re
 
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
-labour_processed = calculate_centered_rank(labour)
+
+# Remove Aggregated Rows
+labour_filtered = labour.filter(
+    ~pl.col("Industry").is_in(
+        [
+            "Total employed, all industries",
+            "Goods-producing sector",
+            "Services-producing sector",
+        ]
+    )
+)
+
+# Calculate ranking based on monthly % change
+labour_processed = calculate_centered_rank(labour_filtered)
+
+# Bin % difference
 labour_processed_cutted = cut_pdiff(labour_processed, DEFAULT_CUTS)
 plot_data = labour_processed_cutted.filter(
     pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
@@ -142,7 +157,6 @@ LEGEND_LABELS = [
     "5%",
 ]
 ```
-
 
 # Sector Shifts: Where Canada's Jobs Are Moving
 
@@ -198,7 +212,7 @@ plot
 ```{python}
 # | output: asis
 ALL_INDUSTRIES = (
-    labour_processed_cutted.select("Industry").unique().to_series().to_list()
+    labour_filtered.select("Industry").unique(maintain_order=True).to_series().to_list()
 )
 
 for INDUSTRY in ALL_INDUSTRIES:
