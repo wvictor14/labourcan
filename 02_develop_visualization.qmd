@@ -48,6 +48,7 @@ import polars.selectors as cs
 
 # Visualization
 from plotnine import *
+from plotnine.composition import plot_spacer, Beside, Stack
 
 # Mizani helps customize the text and breaks on axes
 from mizani.bounds import squish
@@ -394,17 +395,72 @@ plot_data_subsetted = labour_processed_cutted.filter(                     #  <2>
     pl.col('Industry') == INDUSTRY                                       
 )
 
-(
+plot_highlight = (
     plot
     + geom_point(data=plot_data_subsetted, color='black', fill='black')   #  <3>
 )
+plot_highlight
 ```
 
 1. Specify indsutry
 2. Subset data
 3. Add the subsetted data to another `geom_point` layer
 
-# Line plot of unemployment
+## Aligning multiple plots along their shared axis 
+
+I wanted to add a line plot of employment numbers to the heatmap. Given the similar syntax in plotnine's [compose](https://plotnine.org/guide/plot-composition.html) to R's [patchwork](https://patchwork.data-imaginist.com/), I assumed that alignment of multiple plots would happen automatically. But they don't.
+
+
+```{python}
+line_plot = (
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0],
+            pl.col("YEAR") <= FILTER_YEAR[1],
+            pl.col("Industry").is_in(["Total employed, all industries"]),
+        ),
+        aes(x="DATE_YMD", y="VALUE"),
+    )
+    + geom_line(color = 'black')
+    + theme_tufte()
+    + theme(
+        legend_position="none",
+        plot_title=element_text(size=10, ha='left'),
+        axis_ticks_length=3,
+        axis_ticks_major_y=element_line(),
+        axis_text_y=element_text(
+            size=8, margin={"r": 2, "l": 2, "units": "pt"}),
+    )
+    + scale_y_continuous(
+        breaks=mb.breaks_extended(3),
+        labels=lambda x: ['{:.0f}K'.format(xi / 1000) for xi in x])
+    + labs(title='Employment Rate')
+)
+line_plot
+```
+
+```{python}
+p1 = Stack([
+    line_plot + scale_x_datetime(expand=(0, 0)),
+    plot_spacer(), plot_spacer(), plot_spacer()
+])
+
+p2 = (
+    plot_highlight
+    + theme(plot_title=element_blank(), plot_subtitle=element_blank())
+    + scale_x_datetime(expand=(0, 0))
+)
+
+Stack([p1, p2]) & scale_x_datetime(expand=(0, 0)) + theme_bw()
+Stack([p2, p1]) & scale_x_datetime(expand=(0, 0)) + theme_bw()
+
+```
+
+```{python}
+Stack([plot_highlight, line_plot]) & scale_x_datetime(
+    expand=(0, 0)) + theme_bw()
+```
+
 
 # Appendix
 
@@ -422,7 +478,7 @@ Initially I wanted a horizontal legend for the colors. But in order to remove th
 But it still didn't really work out the way I hoped, so I stuck with a vertical legend instead.
 
 ```{python}
-#| echo: false
+# | echo: false
 (
     ggplot(
         labour_processed_cutted.filter(
