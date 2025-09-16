@@ -24,7 +24,7 @@ def read_labourcan(file: Union[str, Path]) -> pl.DataFrame:
             - Sorted chronologically by year and month
 
     Example:
-        >>> df = read_labourcan("data/14100022.csv")
+        >>> df = read_labourcan("data/14100355.csv")
         >>> print(df.columns)
         ['REF_DATE', 'GEO', 'Statistics', 'Data type',
             'VALUE', 'YEAR', 'MONTH', 'DATE_YMD']
