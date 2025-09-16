@@ -124,7 +124,7 @@ If we use `geom_tile` instead, which will plot rectangles specified by a center 
         ),
         aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF"),
     )
-    + geom_tile(height=0.95, width = 31*0.95)     # <1>
+    + geom_tile(height=0.95, width=30 * 0.95)  # <1>
     + theme_tufte()
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
     + scale_fill_gradient2(
@@ -133,7 +133,7 @@ If we use `geom_tile` instead, which will plot rectangles specified by a center 
 )
 ```
 
-1. I added `height = 0.95` to add some whitespace between tiles vertically. To remove horizontal whitespace, we need to specify a `width`. Because we are using a `datetime` axis, we need to specify it in unit of days. But each tile here is a month, so we need to express in units of 30 hence: `width = 31*0.95`.
+1. I added `height = 0.95` to add some whitespace between tiles vertically. To remove horizontal whitespace, we need to specify a `width`. Because we are using a `datetime` axis, we need to specify it in unit of days. But each tile here is a month, so we need to express in units of 30 hence: `width = 30*0.95`.
 
 ## Explicit color mapping with `scale_color_manual`
 
