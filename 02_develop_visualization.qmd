@@ -3,7 +3,7 @@ title: "Developing the employment heatmap visualization"
 format: 
   html:
     toc: true
-    embed-resources: true
+    number-sections: true
 jupyter: python3
 editor: 
   render-on-save: true
@@ -25,13 +25,14 @@ The data can be downloaded using this bash [script](https://github.com/wvictor14
 
 ## Parameters
 
-In this initial code chunk we initialize some paramters that, later if needed, we can rerun this entire notebook with different paramters (e.g. different years).
-
-`pyprojroot` is similar to R's package `here`, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization.  
+In this initial code chunk we initialize some parameters that, later if needed, we can rerun this entire notebook with different parameters (e.g. different years). Read more about Quarto parameters [here](https://quarto.org/docs/computations/parameters.html). 
 
 ```{python}
-from pyprojroot import here
+from pyprojroot import here # <1>
 ```
+
+1. `pyprojroot` is similar to R's package `here`, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization. 
+
 ```{python}
 # | tags: [parameters]
 LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
@@ -39,12 +40,15 @@ FIGURE_THEME_SIZE = (8, 6)
 FILTER_YEAR = (2018, 2025)
 ```
 
-## Libraries
+## Dependencies
+
+Now load the rest of the packages. Throughout this tutorial, I will describe when functions from each of these packages are being used.
 
 ```{python}
 # Data manipulation
 import polars as pl
 import polars.selectors as cs
+from datetime import date, datetime
 
 # Visualization
 from plotnine import *
@@ -78,39 +82,50 @@ labour = read_labourcan(LABOUR_DATA_FILE)
 labour_processed = calculate_centered_rank(labour)
 ```
 
-# A first attempt 
+The data is several gigabytes large. Because of this, the data is not stored in the github repo. Please use this [script](https://github.com/wvictor14/labourcan/blob/main/data/downloadLabourData.sh) to download the data.
 
-The type of visual that's being developed here is something like a heatmap of employment numbers.
+# Employment Heatmap
 
-We want a clean separation of industries that are growing or shrinking. For that we are using a rank ordering by % monthly changed. But not just any ordinary rank, we center it around 0 such that sectors that are growing (% change > 0) have a positive rank and those that are shrinking are negative.
+## A first attempt 
 
-`scale_color_gradient2` is a great option because it allows specification of our `midpoint=0`
+The type of graphic that we're developing today can be described as something like a [heatmap](https://plotnine.org/reference/examples/scale_fill_continuous-preview.html) of employment numbers.
+
+The motivation is to tell a story about Canada's job sector, and specifically the variation in employment numbers over time. Thefore, I wanted to create a visualization that would clearly separate industries that are *growing* versus *shrinking*. 
+
+Therefore, I derived a rank ordering by % monthly changed, but that is centered around `0`, such that growing sectors with a positive % change will have a positive ranking and shrinking sectors will have a negative one. The ranking will start at `1` / `-1`, and increase / decrease away from `0`. See [`calculate_centered_rank`](https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py) for implementation details.
 
 ```{python}
 # | page-layout: column-page
 (
     ggplot(
         (
-            labour_processed.filter(
+            labour_processed.filter(  # <1>
                 pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
             )
         ),
-        aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", color="PDIFF"),  # <2>
     )
     + geom_point(shape="s")
-    + theme_tufte()
+    + theme_tufte()  # <3>
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
-    + scale_color_gradient2(
-        limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish
-    )
+    + scale_color_gradient2( # <4>
+        limits=(-0.01, 0.01), low="#ff0000ff", high="#0000dbff", midpoint=0, oob=squish # <5>
+    ) 
 )
 ```
 
+
+1. We filter the data inline so that we can easily interactively develop our graphic
+2. We use `aes` to map our variables: `DATE_YMD` (date in datetime format) to `x`, ranking (i64) to `y`, and color each point by the percent monthly change `PDIFF` (f64).
+3. I like to start with relatively minimal theme, such as `theme_tufte`  as a base to build up customizations
+4. `scale_color_gradient2` is a great color mapping function because it can allow us to easily specify that we want a palette that centers around a midpoint (`0`).
+5. The `limits=c(-0.01, 0.01)` and `oob=squish` is very impactful here, which in combination makes the color palette stop at a -1% and +1%, everything that is beyond these limits will take on the darkest colors.
+
 ## `geom_point` or `geom_tile`
 
-The whitespace between each point is distracting. I could make 
-the point size larger, but the ratio of point size to range of the x and y axis, as well as
-the figure size all will ultimately determine how much whitespace remains between each point.
+I like to start shaping plots by starting with the major components, which `geom` is most appropriate for this type of data?
+
+This first version has quite a bit of whitespace between each point, which I find is distracting. I could make the point size larger, but the ratio of point size to the range of the x and y axis, as well as the figure size all will ultimately determine how much whitespace remains between each point. This makes sizing tricky.
 
 If we use `geom_tile` instead, which will plot rectangles specified by a center point, we can explicitly control the whitespace between tiles.
 
@@ -133,17 +148,17 @@ If we use `geom_tile` instead, which will plot rectangles specified by a center 
 )
 ```
 
-1. I added `height = 0.95` to add some whitespace between tiles vertically. To remove horizontal whitespace, we need to specify a `width`. Because we are using a `datetime` axis, we need to specify it in unit of days. But each tile here is a month, so we need to express in units of 30 hence: `width = 30*0.95`.
+1. `height = 0.95` leaves a small amount of whitespace between tiles vertically. To remove horizontal whitespace, we need to specify a `width`. Because we are using a `datetime` axis, we need to specify it in unit of days. But each tile here is a month, so we need to express in units of 30, hence: `width = 30*0.95`.
 
 ## Explicit color mapping with `scale_color_manual`
 
-I am fairly happy with the `scale_fill_gradient2` used with `squish`. We get a really nice palette 
-that's centered around 0. However `scale_fill_gradient2` is limited to 3 colors (`high`, `midpoint`, `low`),
-which is not quite enable the more dynamic color palette that I'm seeking.
+`scale_fill_gradient2` used with `squish` creates a nice palette that's centered around 0. However `scale_fill_gradient2` is limited to 3 colors (`high`, `midpoint`, `low`), but I would like to highlight variability in the data with a lot more control than what these 3 points can provide.
 
 To be more explicit with the colors, I will bin the % change variable and then map each bin to a color manually using `scale_fill_manual`.
 
 ### Bin with `polars.Series.cut`
+
+Binning is the process of breaking up a continuous variable into categories based on specific thresholds.
 
 ```{python}
 labour_processed_cutted = (
@@ -178,6 +193,8 @@ labour_processed_cutted = (
 labour_processed_cutted.group_by("PDIFF_BINNED").len()
 ```
 
+After binning the data by % change, we can see what happens when we map color to this new binned version:
+
 ```{python}
 (
     ggplot(
@@ -186,13 +203,21 @@ labour_processed_cutted.group_by("PDIFF_BINNED").len()
                 pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
             )
         ),
-        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+        aes(
+            x="DATE_YMD",
+            y="centered_rank_across_industry",
+            fill="PDIFF_BINNED",  # <1>
+        ),
     )
-    + geom_tile(height=0.95)  # whitespace between tiles, vertically
+    + geom_tile(height=0.95) 
     + theme_tufte()
     + theme(figure_size=FIGURE_THEME_SIZE, axis_text_x=element_text(angle=90))
 )
 ```
+
+1. Here, `plotnine` sees that we mapped a categorical variable to `fill`, so it uses a default palette that isn't necessarily optimized for the continuous (ie. ordinal) nature of bins. To offend even further, we can see that the categories are not even by default ordered correctly (most negative to most positive).
+
+It's definitely uglier, not nicer. But that's ok, it's giving us finer control, and we're going to use that to fix this in the next section...
 
 ### `scale_fill_manual` for explicit color mapping
 
@@ -214,7 +239,7 @@ labour_processed_cutted_ordered = labour_processed_cutted.with_columns(
     pl.col("PDIFF_BINNED").cast(pl.Enum(order))
 )
 
-color_mapping = {
+color_mapping = {  # <1>
     "(-inf, -0.05]": "#d82828ff",
     "(-0.05, -0.025]": "#fa6f1fff",
     "(-0.025, -0.012]": "#f1874aff",
@@ -237,7 +262,7 @@ color_mapping = {
                 pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
             )
         ),
-        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"), # <1>
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"), 
     )
     + geom_tile(color="white")
     + theme_tufte()
@@ -246,20 +271,30 @@ color_mapping = {
 )
 ```
 
-1. map `fill` to `PDIFF_BINNED`
-2. provide explicit color mapping to `scale_fill_manual`
+1. First, we define a dictionary that specifies an explicit mapping of bins to color
+2. Then, we provide the dictionary to `values` in `scale_fill_manual`
 
-The power of `scale_fill_manual` is that it enables much more explicit control over 
-how color is mapped to data. However, the cost was that it takes a lot more effort and lines of code, compared to `scale_fill_gradient2`, which works well "out-of-box".
+Now we have a much nicer looking color palette for our graphic. This process illustrates a few things:
 
-## The legend
+- `scale_fill_gradient2` 
+  - Worked well "out-of-the-box" 
+  - But is limited for more fine-grained control over the gradient
+- `scale_fill_manual` plus our binning procedure 
+  - allows us to explicitly control how color is mapped to the data. 
+  - For example, this approach allows us to highlight more extreme values with how we define extreme (e.g. >+5%, <-5%), or non significant data (0% no change)
+  - But the cost was that it takes a lot more effort and lines of code 
 
-...is mathematically accurate, however we are going to make it nicer to look at.
+## Customizing the `plotnine` legend
 
-First let's make the text more concise: we don't need every bin to be labelled, and instead of listing the range, we can just describe the midpoint.
+... which in its current form, is mathematically accurate, but we can make it much nicer to look at.
+
+Let's start by making the text more concise: 
+
+- We don't need every bin to be labelled 
+- Instead of listing the range, we can just describe the midpoint
 
 ```{python}
-legend_labels = [
+legend_labels = [  # <1>
     "-5%",  # the ends can be labelled with the boundary e.g. implies <-5%
     "",
     "",
@@ -296,11 +331,14 @@ legend_labels = [
         legend_key_height=10,
         legend_text=element_text(size=8),
     )
-    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels) # <1>
+    + scale_fill_manual(  # <2>
+        values=color_mapping, breaks=order, labels=legend_labels
+    )
 )
 ```
 
-1. provide the list `legend_labels` to `scale_fill_manual`
+1. Similar to `values`, for `labels` we define a list that is the same length as the `breaks`
+2. And then we provide the list `legend_labels` to `scale_fill_manual`
 
 I originally wanted to make a [horizontal legend](#horizontal-legend-with-horizontal-legend-text), but this works much better.
 
@@ -318,9 +356,30 @@ fk.install(FONT_PRIMARY)
 fk.install(FONT_SECONDARY)
 ```
 
+### Consistent theming with Brand.yml
+
+Alternatively, if we utilize [`brand.yml`](https://github.com/wvictor14/labourcan/blob/main/_brand.yml), we can pull these settings directly from it. 
+
+```{python}
+from brand_yml import Brand
+
+BRAND = Brand.from_yaml(here())
+FONT_PRIMARY = BRAND.typography.base.model_dump()["family"]  # <1>
+COLOR_BACKGROUND = BRAND.color.background  # <2>
+```
+
+1. Import the brand data and extract the `family` from `typography`
+2. Import other components, e.g. `color`
+
+That's nice because if we want to change the font we can just edit the brand.yml configuration, and these changes will automatically propagate throughout any connected document like this one. 
+
+We can also connect other components like using the the brand's color as our plot background, which will make it the same as the surrounding background from our quarto website.
+
+Read more about `Brand` [here](https://posit-dev.github.io/brand-yml/).
+
 ### `mizani` for axis breaks and labels
 
-plotnine breaks and labels for the scales can be easily adjusted using [`mizani`](https://mizani.readthedocs.io/en/stable/), which is like the [`scales`](https://scales.r-lib.org/) equivalent to `ggplot2`
+The axis breaks and labels for Plotnine graphs can be easily customized using  [`mizani`](https://mizani.readthedocs.io/en/stable/), which is the "[scales](https://scales.r-lib.org/)" package for python.
 
 We're going to use `mizani.breaks.breaks_date_width` to put breaks for each year, and `mizani.labels.label_date` to drop the "month" part of the date. 
 
@@ -338,10 +397,10 @@ plot = (
     + geom_tile(color="white", height=0.95)
     + theme_tufte()
     + theme(
-        text=element_text(family=FONT_PRIMARY),               # <1>
+        text=element_text(family=FONT_PRIMARY),  # <1>
         figure_size=FIGURE_THEME_SIZE,
-        axis_text_y=element_text(family=FONT_SECONDARY),      # <1>
-        axis_text_x=element_text(family=FONT_SECONDARY),      # <1>
+        axis_text_y=element_text(family=FONT_SECONDARY),  # <1>
+        axis_text_x=element_text(family=FONT_SECONDARY),  # <1>
         axis_title_y=element_text(weight=300),
         legend_justification_right=1,
         legend_position="right",
@@ -350,21 +409,20 @@ plot = (
         legend_key_spacing=0,
         legend_key_width=15,
         legend_key_height=15,
-        legend_text=element_text(size=8, family=FONT_SECONDARY), # <1>
+        legend_text=element_text(size=8, family=FONT_SECONDARY),  # <1>
         legend_title=element_blank(),
         plot_title=element_text(ha="left"),
-        plot_subtitle=element_text(
-            ha="left", margin={"b": 1, "units": "lines"}),
+        plot_subtitle=element_text(ha="left", margin={"b": 1, "units": "lines"}),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
     )
-    + scale_fill_manual(values=color_mapping,
-                        breaks=order, labels=legend_labels)
+    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
     + guides(fill=guide_legend(ncol=1, reverse=True))
     + scale_x_datetime(
-        labels=ml.label_date("%Y"),                   #  <2> 
+        labels=ml.label_date("%Y"),  #  <2>
         expand=(0, 0),
-        breaks=mb.breaks_date_width("1 years"),       #  <2> 
+        breaks=mb.breaks_date_width("1 years"),  #  <2>
     )
-    + labs(                                               # <3>
+    + labs(  # <3>
         title="Sector Shifts: Where Canada's Jobs Are Moving",
         subtitle=textwrap.fill(
             "Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.",
@@ -381,9 +439,17 @@ plot
 2. Use `mizani` to format labels to show only the year in `scale_x_datetime`
 3. Add `title`, `subtitle` and wrap long lines with the help of `textwrap`
 
-## Highlighting an Industry
+## Conclusion of the base graphic
 
-For more industry-specific insights, I would like to see where each individual ranks in the graphic.
+And that concludes generating the employment heatmap. However, I found this graphic to be lacking in depth: what are the industries that are growing and shrinking? And by how much?
+
+# Adding more layers
+
+It is tough to embed even more additional information into this already information dense graphic. 
+
+So my strategy here is to highlight one industry at a time.
+
+## Highlighting an Industry
 
 ```{python}
 INDUSTRY = 'Wholesale and retail trade [41, 44-45]'                       #  <1>
@@ -394,35 +460,145 @@ plot_data_subsetted = labour_processed_cutted.filter(                     #  <2>
     pl.col('Industry') == INDUSTRY                                       
 )
 
-(
+plot_highlight_industry = (
     plot
     + geom_point(data=plot_data_subsetted, color='black', fill='black')   #  <3>
+    + labs(title = INDUSTRY, subtitle = '')
 )
+plot_highlight_industry
 ```
 
 1. Specify indsutry
 2. Subset data
 3. Add the subsetted data to another `geom_point` layer
 
-# Line plot of unemployment
+Great, now we can indicate a specific industry's data onto the graphic.
 
-# Appendix
+But I personally still find the graphic a bit unsatisfying as it is hard to read out any specific numbers from it. 
 
-## Things that didn't work
+## Adding statistics to the plot
 
-This section is a non-exhaustive list of design elements I wasn't able to solve with `plotnine`
+I think adding a few raw numbers to the graphic will leave a more impactful impression on readers.
 
-https://ggplot2.tidyverse.org/reference/geom_tile.html#aesthetics
+In this section I compute the change, and % change for the last: 
 
+- 1 month 
+- 5 months
+- 1 year
+- 5 years
 
-### Horizontal legend with horizontal legend text
+```{python}
+# Define offsets
+offsets = {
+    "1M": 1,
+    "5M": 5,
+    "1Y": 12,
+    "5Y": 60,
+}
+
+# Sort by industry + date
+labour_offset = labour_processed_cutted
+labour_offset = labour_offset.sort(["Industry", "DATE_YMD"])
+
+# Compute diffs and %diffs for each horizon
+for label, months in offsets.items():
+    labour_offset = labour_offset.with_columns(
+        [
+            (pl.col("DATE_YMD").shift(months).alias(f"DATE_YMD_{label}")),
+            (pl.col("VALUE").shift(months).over("Industry").alias(f"VALUE_{label}")),
+            (pl.col("VALUE") - pl.col("VALUE").shift(months).over("Industry")).alias(
+                f"DIFF_{label}"
+            ),
+            (
+                (pl.col("VALUE") - pl.col("VALUE").shift(months).over("Industry"))
+                / pl.col("VALUE").shift(months).over("Industry")
+                * 100
+            ).alias(f"PDIFF_{label}"),
+        ]
+    )
+
+# convert to dictionary for easier access
+stats = labour_offset.filter(
+    pl.col("Industry") == INDUSTRY, pl.col("DATE_YMD") == pl.col("DATE_YMD").max()
+).to_dicts()[0]
+
+# generate a string that we can use as a subtitle
+periods = [
+    f"{stats['DIFF_1M']:<+4.0f} {f'({stats["PDIFF_1M"]:+.2f}%)':<10} 1 Month",
+    f"{stats['DIFF_5M']:<+4.0f} {f'({stats["PDIFF_5M"]:+.2f}%)':<10} 5 Months",
+    f"{stats['DIFF_1Y']:<+4.0f} {f'({stats["PDIFF_1Y"]:+.2f}%)':<10} 1 Year",
+    f"{stats['DIFF_5Y']:<+4.0f} {f'({stats["PDIFF_5Y"]:+.2f}%)':<10} 5 Years",
+]
+subtitle_text = "\n".join(periods)
+```
+
+The plan is to add these into the plot as a subtitle. I would love to additionally set green and red colors to positive and negative values, but that isn't currently possible in `plotnine`. However, [#612](https://github.com/has2k1/plotnine/issues/612) suggests this may be possible in the longer term.
+
+```{python}
+import re
+
+(
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+        ),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white", height=0.95)
+    + theme_tufte()
+    + theme(
+        text=element_text(family=FONT_PRIMARY),
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_y=element_text(family=FONT_SECONDARY),
+        axis_text_x=element_text(family=FONT_SECONDARY),
+        axis_title_y=element_text(weight=300),
+        legend_justification_right=1,
+        legend_position="right",
+        legend_text_position="right",
+        legend_title_position="top",
+        legend_key_spacing=0,
+        legend_key_width=15,
+        legend_key_height=15,
+        legend_text=element_text(size=8, family=FONT_SECONDARY),
+        legend_title=element_blank(),
+        plot_title=element_text(ha="left"),
+        plot_subtitle=element_text(ha="left", margin={"b": 1, "units": "lines"}),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
+    )
+    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
+    + guides(fill=guide_legend(ncol=1, reverse=True))
+    + scale_x_datetime(
+        labels=ml.label_date("%Y"),
+        expand=(0, 0),
+        breaks=mb.breaks_date_width("1 years"),
+    )
+    + labs(
+        title=re.sub(r" \[.*?\]$", "", INDUSTRY),  # <1>
+        subtitle=subtitle_text,  # <2>
+        x="",
+        y="< SECTORS FALLING            SECTORS RISING >",
+    )
+    + geom_point(data=plot_data_subsetted, color="black", fill="black")
+)
+```
+
+1. Use inline regex to remove the trailing special characters
+2. add `subtitle_text` to `labs`
+
+# Appendix: Things that didn't work
+
+This section is a non-exhaustive list problems I wasn't able to solve with `plotnine`.
+
+Note that this tutorial was made with `plotnine` version `0.15.0`. I fully expect that this appendix will likely very quickly become irrelevant with the many anticipated improvements that are coming to `plotnine` in the near future.
+
+## Horizontal legend with horizontal legend text
 
 Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they "push" the legend keys apart in uneven manner. I attempted to (*unsuccesfully*) address this by making the legend text small, eliminating as much text as possible (e.g. removing the "%" characters for `-0.50` and `0.50`), and lastly increasing the legend key size. 
 
 But it still didn't really work out the way I hoped, so I stuck with a vertical legend instead.
 
 ```{python}
-#| echo: false
+# | echo: false
 (
     ggplot(
         labour_processed_cutted.filter(
@@ -444,8 +620,10 @@ But it still didn't really work out the way I hoped, so I stuck with a vertical 
         legend_key_height=10,
         legend_text=element_text(size=8),
     )
-    + scale_fill_manual(values=color_mapping,
-                        breaks=order, labels=legend_labels)
+    + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
     + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
 )
 ```
+
+## Composing in plotnine is not like R's patchwork
+
