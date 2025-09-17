@@ -11,9 +11,9 @@ website:
       - sidebar:how
     tools:
       - icon: linkedin
-        href:  linkedin.com/in/victor2wy/
+        href:  https://linkedin.com/in/victor2wy/
       - icon: github
-        href:  github.com/wvictor14/labourcan/
+        href:  https://github.com/wvictor14/labourcan/
   sidebar:
     - id: how
       title: "How"
