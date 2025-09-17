@@ -105,6 +105,11 @@ import re
 
 ## Data
 
+- Read data
+- Calculate Ranking 
+- Set color mapping
+- Calculate stats
+
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
 
@@ -124,7 +129,7 @@ labour_processed = calculate_centered_rank(labour_filtered)
 
 # Bin % difference
 labour_processed_cutted = cut_pdiff(labour_processed, DEFAULT_CUTS)
-plot_data = labour_processed_cutted.filter(
+labour_processed_filtered = labour_processed_cutted.filter(
     pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
 )
 
@@ -160,9 +165,62 @@ LEGEND_LABELS = [
 ]
 ```
 
+Stats
+
+```{python}
+def make_subtitle_for_industry(df, INDUSTRY):
+    # Define offsets
+    offsets = {
+        "1M": 1,
+        "5M": 5,
+        "1Y": 12,
+        "5Y": 60,
+    }
+
+    # Sort by industry + date
+    labour_offset = df
+    labour_offset = labour_offset.sort(["Industry", "DATE_YMD"])
+
+    # Compute diffs and %diffs for each horizon
+    for label, months in offsets.items():
+        labour_offset = labour_offset.with_columns(
+            [
+                (pl.col("DATE_YMD").shift(months).alias(f"DATE_YMD_{label}")),
+                (
+                    pl.col("VALUE")
+                    .shift(months)
+                    .over("Industry")
+                    .alias(f"VALUE_{label}")
+                ),
+                (
+                    pl.col("VALUE") - pl.col("VALUE").shift(months).over("Industry")
+                ).alias(f"DIFF_{label}"),
+                (
+                    (pl.col("VALUE") - pl.col("VALUE").shift(months).over("Industry"))
+                    / pl.col("VALUE").shift(months).over("Industry")
+                    * 100
+                ).alias(f"PDIFF_{label}"),
+            ]
+        )
+    # convert to dictionary for easier access
+    stats = labour_offset.filter(
+        pl.col("Industry") == INDUSTRY, pl.col("DATE_YMD") == pl.col("DATE_YMD").max()
+    ).to_dicts()[0]
+
+    periods = [
+        f"{stats['DIFF_1M'] * 1000:<+8,.0f} {f'({stats["PDIFF_1M"]:+.2f}%)':<10} Past Month",
+        f"{stats['DIFF_5M'] * 1000:<+8,.0f} {f'({stats["PDIFF_5M"]:+.2f}%)':<10} Past 5 Months",
+        f"{stats['DIFF_1Y'] * 1000:<+8,.0f} {f'({stats["PDIFF_1Y"]:+.2f}%)':<10} Past Year",
+        f"{stats['DIFF_5Y'] * 1000:<+8,.0f} {f'({stats["PDIFF_5Y"]:+.2f}%)':<10} Past 5 Years",
+    ]
+
+    subtitle_text = "\n".join(periods)
+    return subtitle_text
+```
+
 # Sector Shifts: Where Canada's Jobs Are Moving
 
-Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels. Data pulled directly from StatCan @statcan.
+Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels. Change in employment levels is listed for 1 month, 5 months, 1 year, and 5 years. Data pulled directly from StatCan @statcan. 
 
 ::: {.panel-tabset .nav-pills .column-page-inset}
 
@@ -170,6 +228,12 @@ Track the number of industries gaining or losing jobs each month. Boxes are shad
 
 ```{python}
 # | output: asis
+plot_data = labour_processed_filtered
+INDUSTRY = "Total employed, all industries"
+
+#  use the unfiltered labour df to generate the stats for the total
+subtitle_text = make_subtitle_for_industry(labour, INDUSTRY)
+
 plot = (
     ggplot(
         plot_data,
@@ -206,6 +270,8 @@ plot = (
     + labs(
         x="",
         y="< SECTORS FALLING            SECTORS RISING >",
+        subtitle=subtitle_text,
+        title=re.sub(r" \[.*?\]$", "", INDUSTRY),
     )
 )
 plot
@@ -220,7 +286,12 @@ ALL_INDUSTRIES = (
 for INDUSTRY in ALL_INDUSTRIES:
     display(Markdown(f"### {re.sub(r' \[.*?\]$', '', INDUSTRY)}"))
     plot_data_subsetted = plot_data.filter(pl.col("Industry") == INDUSTRY)
-    p = plot + geom_point(data=plot_data_subsetted, color="black", fill="black")
+    subtitle_text = make_subtitle_for_industry(labour, INDUSTRY)
+    p = (
+        plot
+        + geom_point(data=plot_data_subsetted, color="black", fill="black")
+        + labs(subtitle=subtitle_text, title=re.sub(r" \[.*?\]$", "", INDUSTRY))
+    )
     p.show()
     display(Markdown(f" "))
 ```
