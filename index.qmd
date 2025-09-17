@@ -1,5 +1,7 @@
 ---
 title: "Track Canada's Labour Statistics"
+bibliography: references.bib
+csl: diabetologia.csl
 author: "Victor Yuan"
 date: today
 date-modified: today
@@ -160,7 +162,7 @@ LEGEND_LABELS = [
 
 # Sector Shifts: Where Canada's Jobs Are Moving
 
-Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels.
+Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels. Data pulled directly from StatCan @statcan.
 
 ::: {.panel-tabset .nav-pills .column-page-inset}
 
@@ -223,4 +225,10 @@ for INDUSTRY in ALL_INDUSTRIES:
     display(Markdown(f" "))
 ```
 
+:::
+
+
+### References
+
+::: {#refs}
 :::
