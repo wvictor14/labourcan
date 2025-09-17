@@ -619,6 +619,7 @@ But it still didn't really work out the way I hoped, so I stuck with a vertical 
         legend_key_width=10,
         legend_key_height=10,
         legend_text=element_text(size=8),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
     )
     + scale_fill_manual(values=color_mapping, breaks=order, labels=legend_labels)
     + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
@@ -627,3 +628,82 @@ But it still didn't really work out the way I hoped, so I stuck with a vertical 
 
 ## Composing in plotnine is not like R's patchwork
 
+I wanted to add a line plot of employment numbers to the heatmap. Given the similar syntax in plotnine's [compose](https://plotnine.org/guide/plot-composition.html) to R's [patchwork](https://patchwork.data-imaginist.com/), I thought the behaviour would be similar.
+
+One discrepancy is that there is no way to specify the relative size of component plots. But this might be addressed very soon [#980](https://github.com/has2k1/plotnine/pull/980)
+
+It is possible to (rather labourously) pad plots by using `plot_spacer`s, which I attemp unsuccessfully below:
+
+```{python}
+line_plot = (
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0],
+            pl.col("YEAR") <= FILTER_YEAR[1],
+            pl.col("Industry").is_in(["Total employed, all industries"]),
+        ),
+        aes(x="DATE_YMD", y="VALUE"),
+    )
+    + geom_line(color="black")
+    + theme_tufte()
+    + theme(
+        legend_position="none",
+        plot_title=element_text(size=10, ha="left"),
+        axis_ticks_length=3,
+        axis_ticks_major_y=element_line(),
+        axis_text_y=element_text(size=8, margin={"r": 2, "l": 2, "units": "pt"}),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
+    )
+    + scale_y_continuous(
+        breaks=mb.breaks_extended(3),
+        labels=lambda x: ["{:.0f}K".format(xi / 1000) for xi in x],
+    )
+    + labs(title="Employment Rate")
+)
+
+from plotnine.composition import Stack, plot_spacer
+
+p1 = Stack(
+    [
+        line_plot + scale_x_datetime(expand=(0, 0)),
+        plot_spacer(),
+        plot_spacer(),
+        plot_spacer(),
+    ]
+)
+
+p2 = (
+    plot_highlight_industry
+    + theme(plot_title=element_blank(), plot_subtitle=element_blank())
+    + scale_x_datetime(expand=(0, 0))
+)
+
+Stack([p1, p2]) & scale_x_datetime(expand=(0, 0)) & theme_bw() & theme(
+    plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+) 
+```
+
+The x axes don't automatically line up
+
+This can be fixed by ensuring `expand` and the `limits` is the same:
+
+```{python}
+Stack([plot_highlight_industry, line_plot]) & scale_x_datetime(
+    expand=(0, 0)
+) & theme_bw() & theme(
+    plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+)
+```
+
+
+But if we add `plot_spacer()`s then it won't line up:
+
+```{python}
+Stack([plot_highlight_industry, p1]) & scale_x_datetime(
+    expand=(0, 0)
+) & theme_bw() & theme(
+    plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+)
+```
+
+Possibly there are some complexities that I don't fully understand [#959](https://github.com/has2k1/plotnine/issues/959)
