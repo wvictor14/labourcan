@@ -274,7 +274,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="parameters" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="parameters"><span class="header-section-number">2.2</span> Parameters</h2>
 <p>In this initial code chunk we initialize some parameters that, later if needed, we can rerun this entire notebook with different parameters (e.g.&nbsp;different years). Read more about Quarto parameters <a href="https://quarto.org/docs/computations/parameters.html">here</a>.</p>
-<div id="7bf53856" class="cell" data-execution_count="1">
+<div id="c009e158" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-1" class="code-annotation-target"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyprojroot <span class="im">import</span> here</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
@@ -285,7 +285,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dl>
 </div>
 </div>
-<div id="e37b236a" class="cell" data-tags="[&quot;parameters&quot;]" data-execution_count="2">
+<div id="dcfa59dc" class="cell" data-tags="[&quot;parameters&quot;]" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>LABOUR_DATA_FILE <span class="op">=</span> here() <span class="op">/</span> <span class="st">"data"</span> <span class="op">/</span> <span class="st">"14100355.csv"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>FIGURE_THEME_SIZE <span class="op">=</span> (<span class="dv">8</span>, <span class="dv">6</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>FILTER_YEAR <span class="op">=</span> (<span class="dv">2018</span>, <span class="dv">2025</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -294,7 +294,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="dependencies" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="dependencies"><span class="header-section-number">2.3</span> Dependencies</h2>
 <p>Now load the rest of the packages. Throughout this tutorial, I will describe when functions from each of these packages are being used.</p>
-<div id="4131de73" class="cell" data-execution_count="3">
+<div id="6972263c" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data manipulation</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars.selectors <span class="im">as</span> cs</span>
@@ -325,7 +325,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Sorted chronologically by year and month</li>
 </ul>
 <p>See <a href="02_develop_data_processing.html">labour.qmd</a> for details on data processing.</p>
-<div id="533dd116" class="cell" data-execution_count="4">
+<div id="5eefb30f" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>labour <span class="op">=</span> read_labourcan(LABOUR_DATA_FILE)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>labour_processed <span class="op">=</span> calculate_centered_rank(labour)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -339,7 +339,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The type of graphic that we’re developing today can be described as something like a <a href="https://plotnine.org/reference/examples/scale_fill_continuous-preview.html">heatmap</a> of employment numbers.</p>
 <p>The motivation is to tell a story about Canada’s job sector, and specifically the variation in employment numbers over time. Thefore, I wanted to create a visualization that would clearly separate industries that are <em>growing</em> versus <em>shrinking</em>.</p>
 <p>Therefore, I derived a rank ordering by % monthly changed, but that is centered around <code>0</code>, such that growing sectors with a positive % change will have a positive ranking and shrinking sectors will have a negative one. The ranking will start at <code>1</code> / <code>-1</code>, and increase / decrease away from <code>0</code>. See <a href="https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py"><code>calculate_centered_rank</code></a> for implementation details.</p>
-<div id="1ec7944a" class="cell" data-page-layout="column-page" data-execution_count="5">
+<div id="82575c8a" class="cell" data-page-layout="column-page" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>        (</span>
@@ -394,7 +394,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>I like to start shaping plots by starting with the major components, which <code>geom</code> is most appropriate for this type of data?</p>
 <p>This first version has quite a bit of whitespace between each point, which I find is distracting. I could make the point size larger, but the ratio of point size to the range of the x and y axis, as well as the figure size all will ultimately determine how much whitespace remains between each point. This makes sizing tricky.</p>
 <p>If we use <code>geom_tile</code> instead, which will plot rectangles specified by a center point, we can explicitly control the whitespace between tiles.</p>
-<div id="cd63913b" class="cell" data-execution_count="6">
+<div id="b6f99df4" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>        (</span>
@@ -435,7 +435,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="bin-with-polars.series.cut" class="level3" data-number="3.3.1">
 <h3 data-number="3.3.1" class="anchored" data-anchor-id="bin-with-polars.series.cut"><span class="header-section-number">3.3.1</span> Bin with <code>polars.Series.cut</code></h3>
 <p>Binning is the process of breaking up a continuous variable into categories based on specific thresholds.</p>
-<div id="c5c2257b" class="cell" data-execution_count="7">
+<div id="5959bafc" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted <span class="op">=</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    labour_processed.with_columns(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"PDIFF"</span>)</span>
@@ -488,48 +488,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>"(-inf, -0.05]"</td>
-<td>47</td>
+<td>"(-0.012, -0.008]"</td>
+<td>717</td>
 </tr>
 <tr class="even">
-<td>"(0.004, 0.008]"</td>
-<td>1736</td>
-</tr>
-<tr class="odd">
-<td>"(-0.05, -0.025]"</td>
-<td>255</td>
-</tr>
-<tr class="even">
-<td>"(-0.025, -0.012]"</td>
-<td>892</td>
+<td>null</td>
+<td>21</td>
 </tr>
 <tr class="odd">
 <td>"(0.05, inf]"</td>
 <td>58</td>
 </tr>
 <tr class="even">
+<td>"(-inf, -0.05]"</td>
+<td>47</td>
+</tr>
+<tr class="odd">
+<td>"(0.008, 0.012]"</td>
+<td>1021</td>
+</tr>
+<tr class="even">
 <td>…</td>
 <td>…</td>
 </tr>
 <tr class="odd">
-<td>null</td>
-<td>21</td>
+<td>"0"</td>
+<td>74</td>
 </tr>
 <tr class="even">
-<td>"(0.008, 0.012]"</td>
-<td>1021</td>
+<td>"(-0.05, -0.025]"</td>
+<td>255</td>
 </tr>
 <tr class="odd">
 <td>"(-0.008, -0.004]"</td>
 <td>1201</td>
 </tr>
 <tr class="even">
-<td>"(0.012, 0.025]"</td>
-<td>1292</td>
+<td>"(0, 0.004]"</td>
+<td>2624</td>
 </tr>
 <tr class="odd">
-<td>"(0.025, 0.05]"</td>
-<td>315</td>
+<td>"(-0.025, -0.012]"</td>
+<td>892</td>
 </tr>
 </tbody>
 </table>
@@ -537,7 +537,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>After binning the data by % change, we can see what happens when we map color to this new binned version:</p>
-<div id="a6d2da86" class="cell" data-execution_count="8">
+<div id="684fd1f4" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>        (</span>
@@ -577,7 +577,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 data-number="3.3.2" class="anchored" data-anchor-id="scale_fill_manual-for-explicit-color-mapping"><span class="header-section-number">3.3.2</span> <code>scale_fill_manual</code> for explicit color mapping</h3>
 <p>Now we need to order the levels, and map to a specific color palette.</p>
 <p>We will make <code>PDIFF=0%</code> (no change) to be gray, positive values to have <code>green</code> and <code>blue</code> colors (<em>growth</em> = <em>good</em>), and negative values to be <code>red</code> and <code>orange</code> (<em>contraction</em> = <em>bad</em>) colors.</p>
-<div id="b35d05a7" class="cell" data-execution_count="9">
+<div id="95bdb194" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> (</span>
 <span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>    labour_processed_cutted.drop_nulls()</span>
 <span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"PDIFF"</span>)</span>
@@ -665,7 +665,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>We don’t need every bin to be labelled</li>
 <li>Instead of listing the range, we can just describe the midpoint</li>
 </ul>
-<div id="c787232b" class="cell" data-execution_count="10">
+<div id="86141222" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-1" class="code-annotation-target"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>legend_labels <span class="op">=</span> [</span>
 <span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-5%"</span>,  <span class="co"># the ends can be labelled with the boundary e.g. implies &lt;-5%</span></span>
 <span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
@@ -733,7 +733,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="3.5" class="anchored" data-anchor-id="text-and-fonts"><span class="header-section-number">3.5</span> Text and fonts</h2>
 <p>Next up is the text and fonts. I played with a few fonts on <a href="https://fonts.google.com/">google fonts</a> before settling on two. Note that this website uses these fonts with the help of <a href="_brand.yml">brand.yml</a></p>
 <p>Install the fonts:</p>
-<div id="4999f00a" class="cell" data-execution_count="11">
+<div id="da6a39a8" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FONT_PRIMARY <span class="op">=</span> <span class="st">"Playfair Display"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>FONT_SECONDARY <span class="op">=</span> <span class="st">"Lato"</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mpl_fontkit <span class="im">as</span> fk</span>
@@ -747,7 +747,7 @@ Font name: `Lato`</code></pre>
 <section id="consistent-theming-with-brand.yml" class="level3" data-number="3.5.1">
 <h3 data-number="3.5.1" class="anchored" data-anchor-id="consistent-theming-with-brand.yml"><span class="header-section-number">3.5.1</span> Consistent theming with Brand.yml</h3>
 <p>Alternatively, if we utilize <a href="https://github.com/wvictor14/labourcan/blob/main/_brand.yml"><code>brand.yml</code></a>, we can pull these settings directly from it.</p>
-<div id="425ab6d8" class="cell" data-execution_count="12">
+<div id="3da0c6a7" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> brand_yml <span class="im">import</span> Brand</span>
 <span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>BRAND <span class="op">=</span> Brand.from_yaml(here())</span>
@@ -774,7 +774,7 @@ Font name: `Lato`</code></pre>
 <h3 data-number="3.5.2" class="anchored" data-anchor-id="mizani-for-axis-breaks-and-labels"><span class="header-section-number">3.5.2</span> <code>mizani</code> for axis breaks and labels</h3>
 <p>The axis breaks and labels for Plotnine graphs can be easily customized using <a href="https://mizani.readthedocs.io/en/stable/"><code>mizani</code></a>, which is the “<a href="https://scales.r-lib.org/">scales</a>” package for python.</p>
 <p>We’re going to use <code>mizani.breaks.breaks_date_width</code> to put breaks for each year, and <code>mizani.labels.label_date</code> to drop the “month” part of the date.</p>
-<div id="4cabb5de" class="cell" data-execution_count="13">
+<div id="d24f7bfe" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.labels <span class="im">as</span> ml</span>
 <span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.breaks <span class="im">as</span> mb</span>
 <span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -861,7 +861,7 @@ Font name: `Lato`</code></pre>
 <p>So my strategy here is to highlight one industry at a time.</p>
 <section id="highlighting-an-industry" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="highlighting-an-industry"><span class="header-section-number">4.1</span> Highlighting an Industry</h2>
-<div id="98418df8" class="cell" data-execution_count="14">
+<div id="645a3981" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-1" class="code-annotation-target"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a>INDUSTRY <span class="op">=</span> <span class="st">'Wholesale and retail trade [41, 44-45]'</span></span>
 <span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-3" class="code-annotation-target"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>plot_data_subsetted <span class="op">=</span> labour_processed_cutted.<span class="bu">filter</span>(</span>
@@ -913,7 +913,7 @@ Font name: `Lato`</code></pre>
 <li>1 year</li>
 <li>5 years</li>
 </ul>
-<div id="45ebd34a" class="cell" data-execution_count="15">
+<div id="7a815392" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define offsets</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>offsets <span class="op">=</span> {</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1M"</span>: <span class="dv">1</span>,</span>
@@ -958,7 +958,7 @@ Font name: `Lato`</code></pre>
 <span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>subtitle_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(periods)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The plan is to add these into the plot as a subtitle. I would love to additionally set green and red colors to positive and negative values, but that isn’t currently possible in <code>plotnine</code>. However, <a href="https://github.com/has2k1/plotnine/issues/612">#612</a> suggests this may be possible in the longer term.</p>
-<div id="bbcf8d4d" class="cell" data-execution_count="16">
+<div id="03db2d61" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-16"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="annotated-cell-16-2"><a href="#annotated-cell-16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-16-3"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1034,7 +1034,7 @@ Font name: `Lato`</code></pre>
 <h2 data-number="5.1" class="anchored" data-anchor-id="horizontal-legend-with-horizontal-legend-text"><span class="header-section-number">5.1</span> Horizontal legend with horizontal legend text</h2>
 <p>Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they “push” the legend keys apart in uneven manner. I attempted to (<em>unsuccesfully</em>) address this by making the legend text small, eliminating as much text as possible (e.g.&nbsp;removing the “%” characters for <code>-0.50</code> and <code>0.50</code>), and lastly increasing the legend key size.</p>
 <p>But it still didn’t really work out the way I hoped, so I stuck with a vertical legend instead.</p>
-<div id="19c32fd0" class="cell" data-execution_count="17">
+<div id="bfb3f815" class="cell" data-execution_count="17">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -1049,7 +1049,7 @@ Font name: `Lato`</code></pre>
 <p>I wanted to add a line plot of employment numbers to the heatmap. Given the similar syntax in plotnine’s <a href="https://plotnine.org/guide/plot-composition.html">compose</a> to R’s <a href="https://patchwork.data-imaginist.com/">patchwork</a>, I thought the behaviour would be similar.</p>
 <p>One discrepancy is that there is no way to specify the relative size of component plots. But this might be addressed very soon <a href="https://github.com/has2k1/plotnine/pull/980">#980</a></p>
 <p>It is possible to (rather labourously) pad plots by using <code>plot_spacer</code>s, which I attemp unsuccessfully below:</p>
-<div id="efe510b0" class="cell" data-execution_count="18">
+<div id="f79ea815" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>line_plot <span class="op">=</span> (</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
@@ -1112,7 +1112,7 @@ which will replace the existing scale.
 </div>
 <p>The x axes don’t automatically line up</p>
 <p>This can be fixed by ensuring <code>expand</code> and the <code>limits</code> is the same:</p>
-<div id="a5f1f0e1" class="cell" data-execution_count="19">
+<div id="e624d457" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Stack([plot_highlight_industry, line_plot]) <span class="op">&amp;</span> scale_x_datetime(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">&amp;</span> theme_bw() <span class="op">&amp;</span> theme(</span>
@@ -1132,8 +1132,8 @@ which will replace the existing scale.
 </div>
 </div>
 </div>
-<p>But if we add <code>plot_spacer()</code>s then it won’t line up:</p>
-<div id="b799cf98" class="cell" data-execution_count="20">
+<p>But if we add <code>plot_spacer()</code>s then it won’t line up because it seems that the space that the legend occupies is now ignored:</p>
+<div id="115633e8" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>Stack([plot_highlight_industry, p1]) <span class="op">&amp;</span> scale_x_datetime(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">&amp;</span> theme_bw() <span class="op">&amp;</span> theme(</span>
@@ -1153,7 +1153,7 @@ which will replace the existing scale.
 </div>
 </div>
 </div>
-<p>Possibly there are some complexities that I don’t fully understand <a href="https://github.com/has2k1/plotnine/issues/959">#959</a></p>
+<p>Possibly there are some complexities that I don’t fully understand <a href="https://github.com/has2k1/plotnine/issues/959">#959</a>, but at this point I decided to throw in the towel.</p>
 
 
 </section>
