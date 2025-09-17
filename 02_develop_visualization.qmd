@@ -696,7 +696,7 @@ Stack([plot_highlight_industry, line_plot]) & scale_x_datetime(
 ```
 
 
-But if we add `plot_spacer()`s then it won't line up:
+But if we add `plot_spacer()`s then it won't line up because it seems that the space that the legend occupies is now ignored:
 
 ```{python}
 Stack([plot_highlight_industry, p1]) & scale_x_datetime(
@@ -706,4 +706,4 @@ Stack([plot_highlight_industry, p1]) & scale_x_datetime(
 )
 ```
 
-Possibly there are some complexities that I don't fully understand [#959](https://github.com/has2k1/plotnine/issues/959)
+Possibly there are some complexities that I don't fully understand [#959](https://github.com/has2k1/plotnine/issues/959), but at this point I decided to throw in the towel.
