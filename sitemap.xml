@@ -2,14 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://wvictor14.github.io/labourcan/index.html</loc>
-    <lastmod>2025-09-17T05:22:23.470Z</lastmod>
-  </url>
-  <url>
-    <loc>https://wvictor14.github.io/labourcan/02_develop_visualization.html</loc>
-    <lastmod>2025-09-17T05:22:23.469Z</lastmod>
+    <lastmod>2025-09-18T21:40:48.929Z</lastmod>
   </url>
   <url>
     <loc>https://wvictor14.github.io/labourcan/01_develop_data_processing.html</loc>
-    <lastmod>2025-09-17T05:22:23.469Z</lastmod>
+    <lastmod>2025-09-18T21:40:48.928Z</lastmod>
+  </url>
+  <url>
+    <loc>https://wvictor14.github.io/labourcan/02_develop_visualization.html</loc>
+    <lastmod>2025-09-18T21:40:48.928Z</lastmod>
+  </url>
+  <url>
+    <loc>https://wvictor14.github.io/labourcan/03_things_that_didnt_work.html</loc>
+    <lastmod>2025-09-18T21:40:48.928Z</lastmod>
   </url>
 </urlset>
