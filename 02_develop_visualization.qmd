@@ -15,7 +15,7 @@ Current Canadian sentiment reflects significant economic uncertainty, with risin
 
 # Introduction 
 
-Plotnine is a python data visualization graphics, heavily inspired by `ggplot2`. Having extensive experience with `ggplot2` and R but less with python, I'm excited to explore plotnine through this submission.
+Plotnine is a python data visualization graphics, heavily inspired by [ggplot2](https://ggplot2.tidyverse.org/). Having extensive experience with `ggplot2` and R but less with python, I'm excited to explore plotnine through this submission.
 
 In this tutorial, I'll walk through the process of creating my plotnine 2025 contest submission: A visualization of that tracks employment across Canadian industries, ranked by their monthly percent change in employment. This visualization reveals which industries are expanding versus contracting in Canada's economic climate over time.
 
@@ -33,7 +33,7 @@ In this initial code chunk we initialize some [parameters](https://quarto.org/do
 from pyprojroot import here # <1>
 ```
 
-1. `pyprojroot` is similar to R's package `here`, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization. 
+1. `pyprojroot` is similar to R's package [here](https://here.r-lib.org/), which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization. 
 
 ```{python}
 # | tags: [parameters]
@@ -75,15 +75,13 @@ The data we are using is from a table called "Employment by industry, monthly, s
 
 The visualization required a fair amount of data processing which is detailed in this [page](01_develop_data_processing.html). The steps are summarized here:
 
-[`read_labourcan`](../py/labourcan/data_processing.py) returns a `polars.Data.Frame` with:
+[`read_labourcan`](https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py) returns a `polars.Data.Frame` with:
 
 - Unused columns removed
 - Filtered to seasonally adjusted estimates only
 - Filtered to Canada level estimates
 - Additional `YEAR`, `MONTH`, and `DATE_YMD` columns extracted from `REF_DATE`
 - Sorted chronologically by year and month
-
-See [labour.qmd](02_develop_data_processing.html) for details on data processing.
 
 ```{python}
 labour = read_labourcan(LABOUR_DATA_FILE)
@@ -609,3 +607,8 @@ import re
 1. Use inline regex to remove the trailing special characters
 2. add `subtitle_text` to `labs`
 
+# Conclusion
+
+That concludes the end of this tutorial. See the [main page](index.qmd) for the complete visualization with some interactivity to allow filtering through industry-specific trends.
+
+Overall, plotnine is a fantastic addition to Python's data visualization universe. Although I found some differences and missing functionality compared to R's `ggplot2`, I was still able to create a complex visualization with relative ease. And, plotnine is still in early days, so I expect improvements and fixes will be developed in future releases.

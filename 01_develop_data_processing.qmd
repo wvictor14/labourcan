@@ -35,7 +35,7 @@ from labourcan.data_processing import read_labourcan
 
 ## Read data
 
-[read_labourcan](../py/labourcan/data_processing.py) returns a polars dataframe with columns:
+[`read_labourcan`](https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py) returns a polars dataframe with columns:
 
 - Unnecessary metadata columns removed
 - Filtered to seasonally adjusted estimates only
