@@ -1,0 +1,297 @@
+---
+title: "Things that didn't work"
+format: 
+  html:
+    toc: true
+    number-sections: false
+    code-tools: true
+    anchor-sections: true
+jupyter: python3
+editor: 
+  render-on-save: true
+---
+
+This section is a non-exhaustive list problems I wasn't able to solve with `plotnine`.
+
+Note that this tutorial was made with `plotnine` version `0.15.0`. I fully expect that this appendix will likely very quickly become irrelevant with the many anticipated improvements that are coming to `plotnine` in the near future.
+
+# Setup {.hidden .unlisted .unnumbered}
+
+## Parameters
+
+```{python}
+from pyprojroot import here
+import mpl_fontkit as fk
+from brand_yml import Brand
+```
+```{python}
+# | tags: [parameters]
+LABOUR_DATA_FILE = here() / "data" / "14100355.csv"
+FIGURE_THEME_SIZE = (9, 5)
+FILTER_YEAR = (2018, 2025)
+BRAND = Brand.from_yaml(here())
+FONT_PRIMARY = BRAND.typography.base.model_dump()["family"]
+FONT_SECONDARY = "Lato"
+fk.install(FONT_PRIMARY)
+fk.install(FONT_SECONDARY)
+COLOR_BACKGROUND = BRAND.color.background
+```
+
+## Libraries
+
+```{python}
+from labourcan.data_processing import (
+    read_labourcan,
+    calculate_centered_rank,
+    cut_pdiff,
+    DEFAULT_CUTS
+)
+import polars as pl
+import polars.selectors as cs
+from mizani.bounds import squish
+import mizani.labels as ml
+import mizani.breaks as mb
+import textwrap
+from great_tables import GT, md, html
+from plotnine import *
+from IPython.display import display, Markdown
+import matplotlib.pyplot as plt
+import re
+```
+
+
+```{python}
+labour = read_labourcan(LABOUR_DATA_FILE)
+
+# Remove Aggregated Rows
+labour_filtered = labour.filter(
+    ~pl.col("Industry").is_in(
+        [
+            "Total employed, all industries",
+            "Goods-producing sector",
+            "Services-producing sector",
+        ]
+    )
+)
+
+# Calculate ranking based on monthly % change
+labour_processed = calculate_centered_rank(labour_filtered)
+
+# Bin % difference
+labour_processed_cutted = cut_pdiff(labour_processed, DEFAULT_CUTS)
+labour_processed_filtered = labour_processed_cutted.filter(
+    pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+)
+
+COLOR_MAPPING = {
+    "(-inf, -0.05]": "#d82828ff",
+    "(-0.05, -0.025]": "#fa6f1fff",
+    "(-0.025, -0.012]": "#f1874aff",
+    "(-0.012, -0.008]": "#f1b274ff",
+    "(-0.008, -0.004]": "#FEE08B",
+    "(-0.004, 0]": "#FFFFBF",
+    "0": "#a8a8a8ff",
+    "(0, 0.004]": "#E6F5D0",
+    "(0.004, 0.008]": "#bce091ff",
+    "(0.008, 0.012]": "#9ad65fff",
+    "(0.012, 0.025]": "#78b552ff",
+    "(0.025, 0.05]": "#5cb027ff",
+    "(0.05, inf]": "#1f6fc6ff",
+}
+LEGEND_LABELS = [
+    "-5%",
+    "",
+    "",
+    "-1%",
+    "",
+    "",
+    "No change",
+    "",
+    "",
+    "1%",
+    "",
+    "",
+    "5%",
+]
+```
+
+Stats
+
+```{python}
+def make_subtitle_for_industry(df, INDUSTRY):
+    # Define offsets
+    offsets = {
+        "1M": 1,
+        "5M": 5,
+        "1Y": 12,
+        "5Y": 60,
+    }
+
+    # Sort by industry + date
+    labour_offset = df
+    labour_offset = labour_offset.sort(["Industry", "DATE_YMD"])
+
+    # Compute diffs and %diffs for each horizon
+    for label, months in offsets.items():
+        labour_offset = labour_offset.with_columns(
+            [
+                (pl.col("DATE_YMD").shift(months).alias(f"DATE_YMD_{label}")),
+                (
+                    pl.col("VALUE")
+                    .shift(months)
+                    .over("Industry")
+                    .alias(f"VALUE_{label}")
+                ),
+                (
+                    pl.col("VALUE") - pl.col("VALUE").shift(months).over("Industry")
+                ).alias(f"DIFF_{label}"),
+                (
+                    (pl.col("VALUE") - pl.col("VALUE").shift(months).over("Industry"))
+                    / pl.col("VALUE").shift(months).over("Industry")
+                    * 100
+                ).alias(f"PDIFF_{label}"),
+            ]
+        )
+    # convert to dictionary for easier access
+    stats = labour_offset.filter(
+        pl.col("Industry") == INDUSTRY, pl.col("DATE_YMD") == pl.col("DATE_YMD").max()
+    ).to_dicts()[0]
+
+    periods = [
+        f"{stats['DIFF_1M'] * 1000:<+8,.0f} {f'({stats["PDIFF_1M"]:+.2f}%)':<10} Past Month",
+        f"{stats['DIFF_5M'] * 1000:<+8,.0f} {f'({stats["PDIFF_5M"]:+.2f}%)':<10} Past 5 Months",
+        f"{stats['DIFF_1Y'] * 1000:<+8,.0f} {f'({stats["PDIFF_1Y"]:+.2f}%)':<10} Past Year",
+        f"{stats['DIFF_5Y'] * 1000:<+8,.0f} {f'({stats["PDIFF_5Y"]:+.2f}%)':<10} Past 5 Years",
+    ]
+
+    subtitle_text = "\n".join(periods)
+    return subtitle_text
+```
+
+# Horizontal legend with horizontal legend text
+
+Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they "push" the legend keys apart in uneven manner. I attempted to (*unsuccesfully*) address this by making the legend text small, eliminating as much text as possible (e.g. removing the "%" characters for `-0.50` and `0.50`), and lastly increasing the legend key size. 
+
+But it still didn't really work out the way I hoped, so I stuck with a vertical legend instead.
+
+```{python}
+# | echo: false
+plot = (
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0], pl.col("YEAR") <= FILTER_YEAR[1]
+        ),
+        aes(x="DATE_YMD", y="centered_rank_across_industry", fill="PDIFF_BINNED"),
+    )
+    + geom_tile(color="white")
+    + theme_tufte()
+    + theme(
+        figure_size=FIGURE_THEME_SIZE,
+        axis_text_x=element_text(angle=90),
+        legend_justification_right=1,
+        legend_position="top",
+        legend_text_position="bottom",
+        legend_title_position="top",
+        legend_key_spacing=0,
+        legend_key_width=10,
+        legend_key_height=10,
+        legend_text=element_text(size=8),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
+    )
+    + scale_fill_manual(values=COLOR_MAPPING, labels=LEGEND_LABELS)
+    + guides(fill=guide_legend(title="% Change From Previous Month", nrow=1))
+)
+plot
+```
+
+# Composing in plotnine is not like R's patchwork
+
+I wanted to add a line plot of employment numbers to the heatmap. Given the similar syntax in plotnine's [compose](https://plotnine.org/guide/plot-composition.html) to R's [patchwork](https://patchwork.data-imaginist.com/), I thought the behaviour would be similar.
+
+One discrepancy is that there is no way to specify the relative size of component plots. But this might be addressed very soon [#980](https://github.com/has2k1/plotnine/pull/980)
+
+It is possible to (rather labourously) pad plots by using `plot_spacer`s, which I attemp unsuccessfully below:
+
+```{python}
+INDUSTRY = "Total employed, all industries"
+plot_data_subsetted = labour_processed_cutted.filter(pl.col("Industry") == INDUSTRY)
+
+plot_highlight_industry = (
+    plot
+    + geom_point(data=plot_data_subsetted, color="black", fill="black")  #  <3>
+    + labs(title=INDUSTRY, subtitle="")
+)
+plot_highlight_industry
+
+line_plot = (
+    ggplot(
+        labour_processed_cutted.filter(
+            pl.col("YEAR") >= FILTER_YEAR[0],
+            pl.col("YEAR") <= FILTER_YEAR[1],
+            pl.col("Industry").is_in([INDUSTRY]),
+        ),
+        aes(x="DATE_YMD", y="VALUE"),
+    )
+    + geom_line(color="black")
+    + theme_tufte()
+    + theme(
+        legend_position="none",
+        plot_title=element_text(size=10, ha="left"),
+        axis_ticks_length=3,
+        axis_ticks_major_y=element_line(),
+        axis_text_y=element_text(size=8, margin={"r": 2, "l": 2, "units": "pt"}),
+        plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND),
+    )
+    + scale_y_continuous(
+        breaks=mb.breaks_extended(3),
+        labels=lambda x: ["{:.0f}K".format(xi / 1000) for xi in x],
+    )
+    + labs(title="Employment Rate")
+)
+
+from plotnine.composition import Stack, plot_spacer
+
+p1 = Stack(
+    [
+        line_plot + scale_x_datetime(expand=(0, 0)),
+        plot_spacer(),
+        plot_spacer(),
+        plot_spacer(),
+    ]
+)
+
+p2 = (
+    plot_highlight_industry
+    + theme(plot_title=element_blank(), plot_subtitle=element_blank())
+    + scale_x_datetime(expand=(0, 0))
+)
+
+Stack([p1, p2]) & scale_x_datetime(expand=(0, 0)) & theme_bw() & theme(
+    plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+) 
+```
+
+The x axes don't automatically line up
+
+This can be fixed by ensuring `expand` and the `limits` is the same:
+
+```{python}
+Stack([plot_highlight_industry, line_plot]) & scale_x_datetime(
+    expand=(0, 0)
+) & theme_bw() & theme(
+    plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+)
+```
+
+
+But if we add `plot_spacer()`s then it won't line up because it seems that the space that the legend occupies is now ignored:
+
+```{python}
+Stack([plot_highlight_industry, p1]) & scale_x_datetime(
+    expand=(0, 0)
+) & theme_bw() & theme(
+    plot_background=element_rect(fill=COLOR_BACKGROUND, color=COLOR_BACKGROUND)
+)
+```
+
+Possibly there are some complexities that I don't fully understand [#959](https://github.com/has2k1/plotnine/issues/959), but at this point I decided to throw in the towel.

@@ -20,5 +20,6 @@ website:
       style: "floating"
       contents:
         - 02_develop_visualization.qmd
+        - 03_things_that_didnt_work.qmd
         - 01_develop_data_processing.qmd
       alignment: center
