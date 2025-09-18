@@ -237,6 +237,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#highlighting-an-industry" id="toc-highlighting-an-industry" class="nav-link" data-scroll-target="#highlighting-an-industry"><span class="header-section-number">4.1</span> Highlighting an Industry</a></li>
   <li><a href="#adding-statistics-to-the-plot" id="toc-adding-statistics-to-the-plot" class="nav-link" data-scroll-target="#adding-statistics-to-the-plot"><span class="header-section-number">4.2</span> Adding statistics to the plot</a></li>
   </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -265,7 +266,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Current Canadian sentiment reflects significant economic uncertainty, with rising cost-of-living pressures, global political instability, and widespread layoffs affecting multiple sectors. For the <a href="https://posit.co/blog/announcing-the-2025-table-and-plotnine-contests/">2025 plotnine contest</a>, I wanted to explore official Canadian labour statistics using <a href="https://plotnine.org/">plotnine</a>, a visualization library that brings the powerful Grammar of Graphics framework to Python.</p>
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>Plotnine is a python data visualization graphics, heavily inspired by <code>ggplot2</code>. Having extensive experience with <code>ggplot2</code> and R but less with python, I’m excited to explore plotnine through this submission.</p>
+<p>Plotnine is a python data visualization graphics, heavily inspired by <a href="https://ggplot2.tidyverse.org/">ggplot2</a>. Having extensive experience with <code>ggplot2</code> and R but less with python, I’m excited to explore plotnine through this submission.</p>
 <p>In this tutorial, I’ll walk through the process of creating my plotnine 2025 contest submission: A visualization of that tracks employment across Canadian industries, ranked by their monthly percent change in employment. This visualization reveals which industries are expanding versus contracting in Canada’s economic climate over time.</p>
 <p>See the final visualizations <a href="index.html">here</a></p>
 <div class="quarto-figure quarto-figure-center">
@@ -280,18 +281,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="parameters" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="parameters"><span class="header-section-number">2.1</span> Parameters</h2>
 <p>In this initial code chunk we initialize some <a href="https://quarto.org/docs/computations/parameters.html">parameters</a> that, later if needed, we can rerun this entire notebook with different parameters (e.g.&nbsp;different years).</p>
-<div id="c5e8f07c" class="cell" data-execution_count="1">
+<div id="dfd537c3" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-1" class="code-annotation-target"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyprojroot <span class="im">import</span> here</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-1" data-code-lines="1" data-code-annotation="1"><code>pyprojroot</code> is similar to R’s package <code>here</code>, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization.</span>
+<span data-code-cell="annotated-cell-1" data-code-lines="1" data-code-annotation="1"><code>pyprojroot</code> is similar to R’s package <a href="https://here.r-lib.org/">here</a>, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization.</span>
 </dd>
 </dl>
 </div>
 </div>
-<div id="bb5bae3a" class="cell" data-tags="[&quot;parameters&quot;]" data-execution_count="2">
+<div id="37ed1cc1" class="cell" data-tags="[&quot;parameters&quot;]" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>LABOUR_DATA_FILE <span class="op">=</span> here() <span class="op">/</span> <span class="st">"data"</span> <span class="op">/</span> <span class="st">"14100355.csv"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>FIGURE_THEME_SIZE <span class="op">=</span> (<span class="dv">8</span>, <span class="dv">6</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>FILTER_YEAR <span class="op">=</span> (<span class="dv">2018</span>, <span class="dv">2025</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -300,7 +301,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="dependencies" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="dependencies"><span class="header-section-number">2.2</span> Dependencies</h2>
 <p>Now load the rest of the packages. Throughout this tutorial, I will describe when functions from each of these packages are being used.</p>
-<div id="1a861ab7" class="cell" data-execution_count="3">
+<div id="23774734" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data manipulation</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars.selectors <span class="im">as</span> cs</span>
@@ -335,7 +336,7 @@ Note
 </div>
 </div>
 <p>The visualization required a fair amount of data processing which is detailed in this <a href="01_develop_data_processing.html">page</a>. The steps are summarized here:</p>
-<p><a href="../py/labourcan/data_processing.py"><code>read_labourcan</code></a> returns a <code>polars.Data.Frame</code> with:</p>
+<p><a href="https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py"><code>read_labourcan</code></a> returns a <code>polars.Data.Frame</code> with:</p>
 <ul>
 <li>Unused columns removed</li>
 <li>Filtered to seasonally adjusted estimates only</li>
@@ -343,8 +344,7 @@ Note
 <li>Additional <code>YEAR</code>, <code>MONTH</code>, and <code>DATE_YMD</code> columns extracted from <code>REF_DATE</code></li>
 <li>Sorted chronologically by year and month</li>
 </ul>
-<p>See <a href="02_develop_data_processing.html">labour.qmd</a> for details on data processing.</p>
-<div id="2f4e003f" class="cell" data-execution_count="4">
+<div id="3973d2a4" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>labour <span class="op">=</span> read_labourcan(LABOUR_DATA_FILE)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>labour_processed <span class="op">=</span> calculate_centered_rank(labour)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -363,7 +363,7 @@ Note
 <li>Ranks increase in magnitude as they move away from zero, creating a clear visual separation between expansion and contraction</li>
 </ul>
 <p>This approach allows viewers to immediately distinguish between industries that are adding jobs versus those that are shedding them. For implementation details, see the <a href="https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py"><code>calculate_centered_rank</code></a> function.</p>
-<div id="c18ba344" class="cell" data-page-layout="column-page" data-execution_count="5">
+<div id="8c4834ad" class="cell" data-page-layout="column-page" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>        (</span>
@@ -418,7 +418,7 @@ Note
 <h2 data-number="3.2" class="anchored" data-anchor-id="geom_point-or-geom_tile"><span class="header-section-number">3.2</span> <code>geom_point</code> or <code>geom_tile</code></h2>
 <p>I like to start creating plots with the major components such as deciding on which <code>geom</code> is most appropriate.</p>
 <p><code>geom_point</code> is a natural starting point for any plot where both <code>x</code> and <code>y</code> are numerical variables. But <code>geom_tile</code> will plot rectangles specified by a center point, allowing more explicit control of the whitespace between tiles.</p>
-<div id="afe91193" class="cell" data-execution_count="6">
+<div id="67df7bd5" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>        (</span>
@@ -459,7 +459,7 @@ Note
 <section id="bin-with-polars.series.cut" class="level3" data-number="3.3.1">
 <h3 data-number="3.3.1" class="anchored" data-anchor-id="bin-with-polars.series.cut"><span class="header-section-number">3.3.1</span> Bin with <code>polars.Series.cut</code></h3>
 <p>Binning is the process of breaking up a continuous variable into categories based on specific thresholds.</p>
-<div id="a9929313" class="cell" data-execution_count="7">
+<div id="460a45a1" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted <span class="op">=</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    labour_processed.with_columns(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"PDIFF"</span>)</span>
@@ -512,48 +512,48 @@ Note
 </thead>
 <tbody>
 <tr class="odd">
+<td>"(-0.05, -0.025]"</td>
+<td>255</td>
+</tr>
+<tr class="even">
+<td>"(-0.025, -0.012]"</td>
+<td>892</td>
+</tr>
+<tr class="odd">
+<td>null</td>
+<td>21</td>
+</tr>
+<tr class="even">
 <td>"(0.004, 0.008]"</td>
 <td>1736</td>
 </tr>
+<tr class="odd">
+<td>"(0.008, 0.012]"</td>
+<td>1021</td>
+</tr>
 <tr class="even">
-<td>null</td>
-<td>21</td>
+<td>…</td>
+<td>…</td>
 </tr>
 <tr class="odd">
 <td>"(0.012, 0.025]"</td>
 <td>1292</td>
 </tr>
 <tr class="even">
-<td>"(-0.004, 0]"</td>
-<td>1999</td>
+<td>"(0, 0.004]"</td>
+<td>2624</td>
 </tr>
 <tr class="odd">
-<td>"0"</td>
-<td>74</td>
+<td>"(0.05, inf]"</td>
+<td>58</td>
 </tr>
 <tr class="even">
-<td>…</td>
-<td>…</td>
+<td>"(0.025, 0.05]"</td>
+<td>315</td>
 </tr>
 <tr class="odd">
-<td>"(-inf, -0.05]"</td>
-<td>47</td>
-</tr>
-<tr class="even">
-<td>"(-0.05, -0.025]"</td>
-<td>255</td>
-</tr>
-<tr class="odd">
-<td>"(-0.025, -0.012]"</td>
-<td>892</td>
-</tr>
-<tr class="even">
 <td>"(-0.008, -0.004]"</td>
 <td>1201</td>
-</tr>
-<tr class="odd">
-<td>"(-0.012, -0.008]"</td>
-<td>717</td>
 </tr>
 </tbody>
 </table>
@@ -561,7 +561,7 @@ Note
 </div>
 </div>
 <p>After binning the data by % change, we can see what happens when we map color to this new binned version:</p>
-<div id="140bbbfd" class="cell" data-execution_count="8">
+<div id="4a1af574" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
 <span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>        (</span>
@@ -601,7 +601,7 @@ Note
 <h3 data-number="3.3.2" class="anchored" data-anchor-id="scale_fill_manual-for-explicit-color-mapping"><span class="header-section-number">3.3.2</span> <code>scale_fill_manual</code> for explicit color mapping</h3>
 <p>Now we need to order the levels, and map to a specific color palette.</p>
 <p>We will make <code>PDIFF=0%</code> (no change) to be gray, positive values to have <code>green</code> and <code>blue</code> colors (<em>growth</em> = <em>good</em>), and negative values to be <code>red</code> and <code>orange</code> (<em>contraction</em> = <em>bad</em>) colors.</p>
-<div id="6b7bde46" class="cell" data-execution_count="9">
+<div id="237df1df" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> (</span>
 <span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>    labour_processed_cutted.drop_nulls()</span>
 <span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"PDIFF"</span>)</span>
@@ -689,7 +689,7 @@ Note
 <li>We don’t need every bin to be labelled</li>
 <li>Instead of listing the range, we can just describe the midpoint</li>
 </ul>
-<div id="60d926ed" class="cell" data-execution_count="10">
+<div id="faffa2f1" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-1" class="code-annotation-target"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>legend_labels <span class="op">=</span> [</span>
 <span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-5%"</span>,  <span class="co"># the ends can be labelled with the boundary e.g. implies &lt;-5%</span></span>
 <span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
@@ -754,7 +754,7 @@ Note
 <p>The legend looks a lot nicer, and easier to immediately grasp the range of the data. Even though I originally wanted to make a <a href="./03_things_that_didnt_work.html#horizontal-legend-with-horizontal-legend-text">horizontal legend</a>, this vertical version is a lot easier to implement and looks equally good. ## Text and fonts</p>
 <p>Next up is the text and fonts. I played with a few fonts on <a href="https://fonts.google.com/">google fonts</a> before settling on two.</p>
 <p>Install the fonts:</p>
-<div id="831c1f9c" class="cell" data-execution_count="11">
+<div id="f824d8ca" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FONT_PRIMARY <span class="op">=</span> <span class="st">"Playfair Display"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>FONT_SECONDARY <span class="op">=</span> <span class="st">"Lato"</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mpl_fontkit <span class="im">as</span> fk</span>
@@ -768,7 +768,7 @@ Font name: `Lato`</code></pre>
 <section id="consistent-theming-with-brand.yml" class="level3" data-number="3.4.1">
 <h3 data-number="3.4.1" class="anchored" data-anchor-id="consistent-theming-with-brand.yml"><span class="header-section-number">3.4.1</span> Consistent theming with Brand.yml</h3>
 <p>Alternatively, if we utilize <a href="https://posit-dev.github.io/brand-yml/"><code>brand.yml</code></a>, we can pull these settings directly from it.</p>
-<div id="27eff3df" class="cell" data-execution_count="12">
+<div id="78e939d4" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> brand_yml <span class="im">import</span> Brand</span>
 <span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>BRAND <span class="op">=</span> Brand.from_yaml(here())</span>
@@ -799,7 +799,7 @@ Note
 <h3 data-number="3.4.2" class="anchored" data-anchor-id="mizani-for-axis-breaks-and-labels"><span class="header-section-number">3.4.2</span> <code>mizani</code> for axis breaks and labels</h3>
 <p>The axis breaks and labels for Plotnine graphs can be easily customized using <a href="https://mizani.readthedocs.io/en/stable/"><code>mizani</code></a>, which is ggplot2’s <a href="https://scales.r-lib.org/">scales</a> package for python.</p>
 <p>We’re going to use <code>mizani.breaks.breaks_date_width</code> so that the x-axis shows each year, and <code>mizani.labels.label_date</code> to drop the “month” part of the date.</p>
-<div id="b2a34b60" class="cell" data-execution_count="13">
+<div id="535199e0" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.labels <span class="im">as</span> ml</span>
 <span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.breaks <span class="im">as</span> mb</span>
 <span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -889,7 +889,7 @@ Note
 <p>We’re going to take advantage of the <code>layering</code> capabilities in <code>plotnine</code> and add industry-specific information ont op.</p>
 <section id="highlighting-an-industry" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="highlighting-an-industry"><span class="header-section-number">4.1</span> Highlighting an Industry</h2>
-<div id="469d566d" class="cell" data-execution_count="15">
+<div id="a4368d89" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-1" class="code-annotation-target"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a>INDUSTRY <span class="op">=</span> <span class="st">"Wholesale and retail trade [41, 44-45]"</span></span>
 <span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-3" class="code-annotation-target"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>plot_data_subsetted <span class="op">=</span> labour_processed_cutted.<span class="bu">filter</span>(</span>
@@ -940,7 +940,7 @@ Note
 <li>1 year</li>
 <li>5 years</li>
 </ul>
-<div id="0175d95f" class="cell" data-execution_count="16">
+<div id="0b68cbbd" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define offsets</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>offsets <span class="op">=</span> {</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1M"</span>: <span class="dv">1</span>,</span>
@@ -985,7 +985,7 @@ Note
 <span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>subtitle_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(periods)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The plan is to add these into the plot as a subtitle. I would love to additionally set green and red colors to positive and negative values, but that isn’t currently possible in <code>plotnine</code>. However, <a href="https://github.com/has2k1/plotnine/issues/612">#612</a> suggests this may be possible in the longer term.</p>
-<div id="02a6b040" class="cell" data-execution_count="17">
+<div id="6138e337" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-16"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="annotated-cell-16-2"><a href="#annotated-cell-16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-16-3"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1051,11 +1051,16 @@ Note
 </div>
 </div>
 </div>
+</section>
+</section>
+<section id="conclusion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Conclusion</h1>
+<p>That concludes the end of this tutorial. See the <a href="./index.html">main page</a> for the complete visualization with some interactivity to allow filtering through industry-specific trends.</p>
+<p>Overall, plotnine is a fantastic addition to Python’s data visualization universe. Although I found some differences and missing functionality compared to R’s <code>ggplot2</code>, I was still able to create a complex visualization with relative ease. And, plotnine is still in early days, so I expect improvements and fixes will be developed in future releases.</p>
 
 
 <!-- -->
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -1527,7 +1532,7 @@ Note
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu"># Introduction </span></span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>Plotnine is a python data visualization graphics, heavily inspired by <span class="in">`ggplot2`</span>. Having extensive experience with <span class="in">`ggplot2`</span> and R but less with python, I'm excited to explore plotnine through this submission.</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>Plotnine is a python data visualization graphics, heavily inspired by <span class="co">[</span><span class="ot">ggplot2</span><span class="co">](https://ggplot2.tidyverse.org/)</span>. Having extensive experience with <span class="in">`ggplot2`</span> and R but less with python, I'm excited to explore plotnine through this submission.</span>
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>In this tutorial, I'll walk through the process of creating my plotnine 2025 contest submission: A visualization of that tracks employment across Canadian industries, ranked by their monthly percent change in employment. This visualization reveals which industries are expanding versus contracting in Canada's economic climate over time.</span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
@@ -1545,7 +1550,7 @@ Note
 <span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyprojroot <span class="im">import</span> here <span class="co"># &lt;1&gt;</span></span>
 <span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`pyprojroot`</span> is similar to R's package <span class="in">`here`</span>, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization. </span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`pyprojroot`</span> is similar to R's package <span class="co">[</span><span class="ot">here</span><span class="co">](https://here.r-lib.org/)</span>, which lets us construct filepaths relative to the project root. This is very convenient especially for quarto projects with complex file organization. </span>
 <span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="co"># | tags: [parameters]</span></span>
@@ -1587,7 +1592,7 @@ Note
 <span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>The visualization required a fair amount of data processing which is detailed in this <span class="co">[</span><span class="ot">page</span><span class="co">](01_develop_data_processing.html)</span>. The steps are summarized here:</span>
 <span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">`read_labourcan`</span><span class="co">](../py/labourcan/data_processing.py)</span> returns a <span class="in">`polars.Data.Frame`</span> with:</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">`read_labourcan`</span><span class="co">](https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py)</span> returns a <span class="in">`polars.Data.Frame`</span> with:</span>
 <span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Unused columns removed</span>
 <span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Filtered to seasonally adjusted estimates only</span>
@@ -1595,531 +1600,535 @@ Note
 <span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Additional <span class="in">`YEAR`</span>, <span class="in">`MONTH`</span>, and <span class="in">`DATE_YMD`</span> columns extracted from <span class="in">`REF_DATE`</span></span>
 <span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Sorted chronologically by year and month</span>
 <span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>See <span class="co">[</span><span class="ot">labour.qmd</span><span class="co">](02_develop_data_processing.html)</span> for details on data processing.</span>
-<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>labour <span class="op">=</span> read_labourcan(LABOUR_DATA_FILE)</span>
-<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>labour_processed <span class="op">=</span> calculate_centered_rank(labour)</span>
-<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>labour <span class="op">=</span> read_labourcan(LABOUR_DATA_FILE)</span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>labour_processed <span class="op">=</span> calculate_centered_rank(labour)</span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a><span class="fu"># Employment Heatmap</span></span>
 <span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a><span class="fu"># Employment Heatmap</span></span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a><span class="fu">## A first attempt </span></span>
 <span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a><span class="fu">## A first attempt </span></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>Today we're developing a <span class="co">[</span><span class="ot">heatmap</span><span class="co">](https://plotnine.org/reference/examples/scale_fill_continuous-preview.html)</span> to tell the story of Canada's evolving job market, specifically highlighting how employment numbers vary across industries over time.</span>
 <span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>Today we're developing a <span class="co">[</span><span class="ot">heatmap</span><span class="co">](https://plotnine.org/reference/examples/scale_fill_continuous-preview.html)</span> to tell the story of Canada's evolving job market, specifically highlighting how employment numbers vary across industries over time.</span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>The reason why I chose a heatmap is because I wanted to communicate the distinction between *growing* and *shrinking* industries. To achieve this, I created a centered ranking system based on monthly percentage change that treats zero as the natural dividing line.</span>
 <span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>The reason why I chose a heatmap is because I wanted to communicate the distinction between *growing* and *shrinking* industries. To achieve this, I created a centered ranking system based on monthly percentage change that treats zero as the natural dividing line.</span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>**How the ranking works:**</span>
 <span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>**How the ranking works:**</span>
-<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Growing sectors (positive % change) receive positive ranks starting from <span class="in">`+1`</span></span>
-<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Shrinking sectors (negative % change) receive negative ranks starting from <span class="in">`-1`</span></span>
-<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Ranks increase in magnitude as they move away from zero, creating a clear visual separation between expansion and contraction</span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Growing sectors (positive % change) receive positive ranks starting from <span class="in">`+1`</span></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Shrinking sectors (negative % change) receive negative ranks starting from <span class="in">`-1`</span></span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Ranks increase in magnitude as they move away from zero, creating a clear visual separation between expansion and contraction</span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a>This approach allows viewers to immediately distinguish between industries that are adding jobs versus those that are shedding them. For implementation details, see the <span class="co">[</span><span class="ot">`calculate_centered_rank`</span><span class="co">](https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py)</span> function.</span>
 <span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a>This approach allows viewers to immediately distinguish between industries that are adding jobs versus those that are shedding them. For implementation details, see the <span class="co">[</span><span class="ot">`calculate_centered_rank`</span><span class="co">](https://github.com/wvictor14/labourcan/blob/main/py/labourcan/data_processing.py)</span> function.</span>
-<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a><span class="co"># | page-layout: column-page</span></span>
-<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>            labour_processed.<span class="bu">filter</span>(  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, color<span class="op">=</span><span class="st">"PDIFF"</span>),  <span class="co"># &lt;2&gt;</span></span>
-<span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(shape<span class="op">=</span><span class="st">"s"</span>)</span>
-<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()  <span class="co"># &lt;3&gt;</span></span>
-<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
-<span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_color_gradient2( <span class="co"># &lt;4&gt;</span></span>
-<span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a>        limits<span class="op">=</span>(<span class="op">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>), low<span class="op">=</span><span class="st">"#ff0000ff"</span>, high<span class="op">=</span><span class="st">"#0000dbff"</span>, midpoint<span class="op">=</span><span class="dv">0</span>, oob<span class="op">=</span>squish <span class="co"># &lt;5&gt;</span></span>
-<span id="cb8-135"><a href="#cb8-135" aria-hidden="true" tabindex="-1"></a>    ) </span>
-<span id="cb8-136"><a href="#cb8-136" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-137"><a href="#cb8-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb8-138"><a href="#cb8-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-139"><a href="#cb8-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-140"><a href="#cb8-140" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>We filter the data inline to enable easy interactive development of the visualization</span>
-<span id="cb8-141"><a href="#cb8-141" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>The aesthetic mapping connects our key variables: <span class="in">`DATE_YMD`</span> (<span class="in">`datetime`</span>) to the x-axis, our centered ranking (<span class="in">`i64`</span>) to the y-axis, and colors each point by monthly percentage change <span class="in">`PDIFF`</span> (<span class="in">`f64`</span>)</span>
-<span id="cb8-142"><a href="#cb8-142" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>I like to start with relatively minimal theme, such as <span class="in">`theme_tufte`</span> as a base to build up customizations</span>
-<span id="cb8-143"><a href="#cb8-143" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span><span class="in">`scale_color_gradient2`</span> is ideal here because it creates a diverging color palette naturally centered around our midpoint of zero</span>
-<span id="cb8-144"><a href="#cb8-144" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>The <span class="in">`limits=c(-0.01, 0.01)`</span> and <span class="in">`oob=squish`</span> in combination creates an impactful visual effect: the color scale is capped at -1% and +1%, and values beyond these limits will have the darkest colors</span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a><span class="co"># | page-layout: column-page</span></span>
+<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a>            labour_processed.<span class="bu">filter</span>(  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, color<span class="op">=</span><span class="st">"PDIFF"</span>),  <span class="co"># &lt;2&gt;</span></span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(shape<span class="op">=</span><span class="st">"s"</span>)</span>
+<span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()  <span class="co"># &lt;3&gt;</span></span>
+<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_color_gradient2( <span class="co"># &lt;4&gt;</span></span>
+<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a>        limits<span class="op">=</span>(<span class="op">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>), low<span class="op">=</span><span class="st">"#ff0000ff"</span>, high<span class="op">=</span><span class="st">"#0000dbff"</span>, midpoint<span class="op">=</span><span class="dv">0</span>, oob<span class="op">=</span>squish <span class="co"># &lt;5&gt;</span></span>
+<span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a>    ) </span>
+<span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-135"><a href="#cb8-135" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-136"><a href="#cb8-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-137"><a href="#cb8-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-138"><a href="#cb8-138" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>We filter the data inline to enable easy interactive development of the visualization</span>
+<span id="cb8-139"><a href="#cb8-139" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>The aesthetic mapping connects our key variables: <span class="in">`DATE_YMD`</span> (<span class="in">`datetime`</span>) to the x-axis, our centered ranking (<span class="in">`i64`</span>) to the y-axis, and colors each point by monthly percentage change <span class="in">`PDIFF`</span> (<span class="in">`f64`</span>)</span>
+<span id="cb8-140"><a href="#cb8-140" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>I like to start with relatively minimal theme, such as <span class="in">`theme_tufte`</span> as a base to build up customizations</span>
+<span id="cb8-141"><a href="#cb8-141" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span><span class="in">`scale_color_gradient2`</span> is ideal here because it creates a diverging color palette naturally centered around our midpoint of zero</span>
+<span id="cb8-142"><a href="#cb8-142" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>The <span class="in">`limits=c(-0.01, 0.01)`</span> and <span class="in">`oob=squish`</span> in combination creates an impactful visual effect: the color scale is capped at -1% and +1%, and values beyond these limits will have the darkest colors</span>
+<span id="cb8-143"><a href="#cb8-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-144"><a href="#cb8-144" aria-hidden="true" tabindex="-1"></a>This first version suffers by excessive whitespace between points, which is visually distracting. This could be addressed by increasing the point size, but the relationship of point size to the axis ranges, and the figure size makes achieving the right balance tricky.</span>
 <span id="cb8-145"><a href="#cb8-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-146"><a href="#cb8-146" aria-hidden="true" tabindex="-1"></a>This first version suffers by excessive whitespace between points, which is visually distracting. This could be addressed by increasing the point size, but the relationship of point size to the axis ranges, and the figure size makes achieving the right balance tricky.</span>
+<span id="cb8-146"><a href="#cb8-146" aria-hidden="true" tabindex="-1"></a><span class="fu">## `geom_point` or `geom_tile`</span></span>
 <span id="cb8-147"><a href="#cb8-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-148"><a href="#cb8-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## `geom_point` or `geom_tile`</span></span>
+<span id="cb8-148"><a href="#cb8-148" aria-hidden="true" tabindex="-1"></a>I like to start creating plots with the major components such as deciding on which <span class="in">`geom`</span> is most appropriate.</span>
 <span id="cb8-149"><a href="#cb8-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-150"><a href="#cb8-150" aria-hidden="true" tabindex="-1"></a>I like to start creating plots with the major components such as deciding on which <span class="in">`geom`</span> is most appropriate.</span>
+<span id="cb8-150"><a href="#cb8-150" aria-hidden="true" tabindex="-1"></a><span class="in">`geom_point`</span> is a natural starting point for any plot where both <span class="in">`x`</span> and <span class="in">`y`</span> are numerical variables. But <span class="in">`geom_tile`</span> will plot rectangles specified by a center point, allowing more explicit control of the whitespace between tiles.</span>
 <span id="cb8-151"><a href="#cb8-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-152"><a href="#cb8-152" aria-hidden="true" tabindex="-1"></a><span class="in">`geom_point`</span> is a natural starting point for any plot where both <span class="in">`x`</span> and <span class="in">`y`</span> are numerical variables. But <span class="in">`geom_tile`</span> will plot rectangles specified by a center point, allowing more explicit control of the whitespace between tiles.</span>
-<span id="cb8-153"><a href="#cb8-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-156"><a href="#cb8-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-157"><a href="#cb8-157" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-158"><a href="#cb8-158" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-159"><a href="#cb8-159" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb8-160"><a href="#cb8-160" aria-hidden="true" tabindex="-1"></a>            labour_processed.<span class="bu">filter</span>(</span>
-<span id="cb8-161"><a href="#cb8-161" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-162"><a href="#cb8-162" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb8-163"><a href="#cb8-163" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-164"><a href="#cb8-164" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF"</span>),</span>
-<span id="cb8-165"><a href="#cb8-165" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-166"><a href="#cb8-166" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(height<span class="op">=</span><span class="fl">0.95</span>, width<span class="op">=</span><span class="dv">30</span> <span class="op">*</span> <span class="fl">0.95</span>)  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-167"><a href="#cb8-167" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
-<span id="cb8-168"><a href="#cb8-168" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
-<span id="cb8-169"><a href="#cb8-169" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_gradient2(</span>
-<span id="cb8-170"><a href="#cb8-170" aria-hidden="true" tabindex="-1"></a>        limits<span class="op">=</span>(<span class="op">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>), low<span class="op">=</span><span class="st">"#ff0000ff"</span>, high<span class="op">=</span><span class="st">"#0000dbff"</span>, midpoint<span class="op">=</span><span class="dv">0</span>, oob<span class="op">=</span>squish</span>
-<span id="cb8-171"><a href="#cb8-171" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-172"><a href="#cb8-172" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-173"><a href="#cb8-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-154"><a href="#cb8-154" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-155"><a href="#cb8-155" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-156"><a href="#cb8-156" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-157"><a href="#cb8-157" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb8-158"><a href="#cb8-158" aria-hidden="true" tabindex="-1"></a>            labour_processed.<span class="bu">filter</span>(</span>
+<span id="cb8-159"><a href="#cb8-159" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-160"><a href="#cb8-160" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb8-161"><a href="#cb8-161" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-162"><a href="#cb8-162" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF"</span>),</span>
+<span id="cb8-163"><a href="#cb8-163" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-164"><a href="#cb8-164" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(height<span class="op">=</span><span class="fl">0.95</span>, width<span class="op">=</span><span class="dv">30</span> <span class="op">*</span> <span class="fl">0.95</span>)  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-165"><a href="#cb8-165" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
+<span id="cb8-166"><a href="#cb8-166" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
+<span id="cb8-167"><a href="#cb8-167" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_gradient2(</span>
+<span id="cb8-168"><a href="#cb8-168" aria-hidden="true" tabindex="-1"></a>        limits<span class="op">=</span>(<span class="op">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>), low<span class="op">=</span><span class="st">"#ff0000ff"</span>, high<span class="op">=</span><span class="st">"#0000dbff"</span>, midpoint<span class="op">=</span><span class="dv">0</span>, oob<span class="op">=</span>squish</span>
+<span id="cb8-169"><a href="#cb8-169" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-170"><a href="#cb8-170" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-171"><a href="#cb8-171" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-172"><a href="#cb8-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-173"><a href="#cb8-173" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`height = 0.95`</span> leaves a small amount of whitespace between tiles vertically. To remove horizontal whitespace, we need to specify a <span class="in">`width`</span>. Because we are using a <span class="in">`datetime`</span> axis, we need to specify it in unit of days. But each tile here is a month, so we need to express in units of 30, hence: <span class="in">`width = 30*0.95`</span>.</span>
 <span id="cb8-174"><a href="#cb8-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-175"><a href="#cb8-175" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`height = 0.95`</span> leaves a small amount of whitespace between tiles vertically. To remove horizontal whitespace, we need to specify a <span class="in">`width`</span>. Because we are using a <span class="in">`datetime`</span> axis, we need to specify it in unit of days. But each tile here is a month, so we need to express in units of 30, hence: <span class="in">`width = 30*0.95`</span>.</span>
+<span id="cb8-175"><a href="#cb8-175" aria-hidden="true" tabindex="-1"></a><span class="fu">## Explicit color mapping with `scale_color_manual`</span></span>
 <span id="cb8-176"><a href="#cb8-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-177"><a href="#cb8-177" aria-hidden="true" tabindex="-1"></a><span class="fu">## Explicit color mapping with `scale_color_manual`</span></span>
+<span id="cb8-177"><a href="#cb8-177" aria-hidden="true" tabindex="-1"></a><span class="in">`scale_fill_gradient2`</span> used with <span class="in">`squish`</span> creates a nice palette that's centered around 0. However <span class="in">`scale_fill_gradient2`</span> is limited to 3 colors (<span class="in">`high`</span>, <span class="in">`midpoint`</span>, <span class="in">`low`</span>), but I would like to highlight variability in the data with a lot more control than what these 3 points can provide.</span>
 <span id="cb8-178"><a href="#cb8-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-179"><a href="#cb8-179" aria-hidden="true" tabindex="-1"></a><span class="in">`scale_fill_gradient2`</span> used with <span class="in">`squish`</span> creates a nice palette that's centered around 0. However <span class="in">`scale_fill_gradient2`</span> is limited to 3 colors (<span class="in">`high`</span>, <span class="in">`midpoint`</span>, <span class="in">`low`</span>), but I would like to highlight variability in the data with a lot more control than what these 3 points can provide.</span>
+<span id="cb8-179"><a href="#cb8-179" aria-hidden="true" tabindex="-1"></a>To be more explicit with the colors, I will bin the % change variable and then map each bin to a color manually using <span class="in">`scale_fill_manual`</span>.</span>
 <span id="cb8-180"><a href="#cb8-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-181"><a href="#cb8-181" aria-hidden="true" tabindex="-1"></a>To be more explicit with the colors, I will bin the % change variable and then map each bin to a color manually using <span class="in">`scale_fill_manual`</span>.</span>
+<span id="cb8-181"><a href="#cb8-181" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bin with `polars.Series.cut`</span></span>
 <span id="cb8-182"><a href="#cb8-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-183"><a href="#cb8-183" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bin with `polars.Series.cut`</span></span>
+<span id="cb8-183"><a href="#cb8-183" aria-hidden="true" tabindex="-1"></a>Binning is the process of breaking up a continuous variable into categories based on specific thresholds.</span>
 <span id="cb8-184"><a href="#cb8-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-185"><a href="#cb8-185" aria-hidden="true" tabindex="-1"></a>Binning is the process of breaking up a continuous variable into categories based on specific thresholds.</span>
-<span id="cb8-186"><a href="#cb8-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-189"><a href="#cb8-189" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-190"><a href="#cb8-190" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted <span class="op">=</span> (</span>
-<span id="cb8-191"><a href="#cb8-191" aria-hidden="true" tabindex="-1"></a>    labour_processed.with_columns(</span>
-<span id="cb8-192"><a href="#cb8-192" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"PDIFF"</span>)</span>
-<span id="cb8-193"><a href="#cb8-193" aria-hidden="true" tabindex="-1"></a>        .cut(</span>
-<span id="cb8-194"><a href="#cb8-194" aria-hidden="true" tabindex="-1"></a>            [</span>
-<span id="cb8-195"><a href="#cb8-195" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.05</span>,</span>
-<span id="cb8-196"><a href="#cb8-196" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.025</span>,</span>
-<span id="cb8-197"><a href="#cb8-197" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.012</span>,</span>
-<span id="cb8-198"><a href="#cb8-198" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.0080</span>,</span>
-<span id="cb8-199"><a href="#cb8-199" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.0040</span>,</span>
-<span id="cb8-200"><a href="#cb8-200" aria-hidden="true" tabindex="-1"></a>                <span class="dv">0</span>,</span>
-<span id="cb8-201"><a href="#cb8-201" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.0040</span>,</span>
-<span id="cb8-202"><a href="#cb8-202" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.0080</span>,</span>
-<span id="cb8-203"><a href="#cb8-203" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.012</span>,</span>
-<span id="cb8-204"><a href="#cb8-204" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.025</span>,</span>
-<span id="cb8-205"><a href="#cb8-205" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.05</span>,</span>
-<span id="cb8-206"><a href="#cb8-206" aria-hidden="true" tabindex="-1"></a>            ]</span>
-<span id="cb8-207"><a href="#cb8-207" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb8-208"><a href="#cb8-208" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"PDIFF_BINNED"</span>)</span>
-<span id="cb8-209"><a href="#cb8-209" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-210"><a href="#cb8-210" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb8-211"><a href="#cb8-211" aria-hidden="true" tabindex="-1"></a>        pl.when(pl.col(<span class="st">"PDIFF"</span>) <span class="op">==</span> <span class="dv">0</span>)</span>
-<span id="cb8-212"><a href="#cb8-212" aria-hidden="true" tabindex="-1"></a>        .then(pl.lit(<span class="st">"0"</span>))</span>
-<span id="cb8-213"><a href="#cb8-213" aria-hidden="true" tabindex="-1"></a>        .otherwise(pl.col(<span class="st">"PDIFF_BINNED"</span>))</span>
-<span id="cb8-214"><a href="#cb8-214" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"PDIFF_BINNED"</span>)</span>
-<span id="cb8-215"><a href="#cb8-215" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-216"><a href="#cb8-216" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"PDIFF"</span>)</span>
-<span id="cb8-217"><a href="#cb8-217" aria-hidden="true" tabindex="-1"></a>    .with_columns(pl.col(<span class="st">"PDIFF_BINNED"</span>))</span>
-<span id="cb8-218"><a href="#cb8-218" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-219"><a href="#cb8-219" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted.group_by(<span class="st">"PDIFF_BINNED"</span>).<span class="bu">len</span>()</span>
-<span id="cb8-220"><a href="#cb8-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-187"><a href="#cb8-187" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-188"><a href="#cb8-188" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted <span class="op">=</span> (</span>
+<span id="cb8-189"><a href="#cb8-189" aria-hidden="true" tabindex="-1"></a>    labour_processed.with_columns(</span>
+<span id="cb8-190"><a href="#cb8-190" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"PDIFF"</span>)</span>
+<span id="cb8-191"><a href="#cb8-191" aria-hidden="true" tabindex="-1"></a>        .cut(</span>
+<span id="cb8-192"><a href="#cb8-192" aria-hidden="true" tabindex="-1"></a>            [</span>
+<span id="cb8-193"><a href="#cb8-193" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.05</span>,</span>
+<span id="cb8-194"><a href="#cb8-194" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.025</span>,</span>
+<span id="cb8-195"><a href="#cb8-195" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.012</span>,</span>
+<span id="cb8-196"><a href="#cb8-196" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.0080</span>,</span>
+<span id="cb8-197"><a href="#cb8-197" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="fl">0.0040</span>,</span>
+<span id="cb8-198"><a href="#cb8-198" aria-hidden="true" tabindex="-1"></a>                <span class="dv">0</span>,</span>
+<span id="cb8-199"><a href="#cb8-199" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.0040</span>,</span>
+<span id="cb8-200"><a href="#cb8-200" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.0080</span>,</span>
+<span id="cb8-201"><a href="#cb8-201" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.012</span>,</span>
+<span id="cb8-202"><a href="#cb8-202" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.025</span>,</span>
+<span id="cb8-203"><a href="#cb8-203" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.05</span>,</span>
+<span id="cb8-204"><a href="#cb8-204" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb8-205"><a href="#cb8-205" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-206"><a href="#cb8-206" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"PDIFF_BINNED"</span>)</span>
+<span id="cb8-207"><a href="#cb8-207" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-208"><a href="#cb8-208" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb8-209"><a href="#cb8-209" aria-hidden="true" tabindex="-1"></a>        pl.when(pl.col(<span class="st">"PDIFF"</span>) <span class="op">==</span> <span class="dv">0</span>)</span>
+<span id="cb8-210"><a href="#cb8-210" aria-hidden="true" tabindex="-1"></a>        .then(pl.lit(<span class="st">"0"</span>))</span>
+<span id="cb8-211"><a href="#cb8-211" aria-hidden="true" tabindex="-1"></a>        .otherwise(pl.col(<span class="st">"PDIFF_BINNED"</span>))</span>
+<span id="cb8-212"><a href="#cb8-212" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"PDIFF_BINNED"</span>)</span>
+<span id="cb8-213"><a href="#cb8-213" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-214"><a href="#cb8-214" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"PDIFF"</span>)</span>
+<span id="cb8-215"><a href="#cb8-215" aria-hidden="true" tabindex="-1"></a>    .with_columns(pl.col(<span class="st">"PDIFF_BINNED"</span>))</span>
+<span id="cb8-216"><a href="#cb8-216" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-217"><a href="#cb8-217" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted.group_by(<span class="st">"PDIFF_BINNED"</span>).<span class="bu">len</span>()</span>
+<span id="cb8-218"><a href="#cb8-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-219"><a href="#cb8-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-220"><a href="#cb8-220" aria-hidden="true" tabindex="-1"></a>After binning the data by % change, we can see what happens when we map color to this new binned version:</span>
 <span id="cb8-221"><a href="#cb8-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-222"><a href="#cb8-222" aria-hidden="true" tabindex="-1"></a>After binning the data by % change, we can see what happens when we map color to this new binned version:</span>
-<span id="cb8-223"><a href="#cb8-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-226"><a href="#cb8-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-227"><a href="#cb8-227" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-228"><a href="#cb8-228" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-229"><a href="#cb8-229" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb8-230"><a href="#cb8-230" aria-hidden="true" tabindex="-1"></a>            labour_processed_cutted.<span class="bu">filter</span>(</span>
-<span id="cb8-231"><a href="#cb8-231" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-232"><a href="#cb8-232" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb8-233"><a href="#cb8-233" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-234"><a href="#cb8-234" aria-hidden="true" tabindex="-1"></a>        aes(</span>
-<span id="cb8-235"><a href="#cb8-235" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="st">"DATE_YMD"</span>,</span>
-<span id="cb8-236"><a href="#cb8-236" aria-hidden="true" tabindex="-1"></a>            y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>,</span>
-<span id="cb8-237"><a href="#cb8-237" aria-hidden="true" tabindex="-1"></a>            fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>,  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-238"><a href="#cb8-238" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-239"><a href="#cb8-239" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-240"><a href="#cb8-240" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(height<span class="op">=</span><span class="fl">0.95</span>) </span>
-<span id="cb8-241"><a href="#cb8-241" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
-<span id="cb8-242"><a href="#cb8-242" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
-<span id="cb8-243"><a href="#cb8-243" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-244"><a href="#cb8-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-224"><a href="#cb8-224" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-225"><a href="#cb8-225" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-226"><a href="#cb8-226" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-227"><a href="#cb8-227" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb8-228"><a href="#cb8-228" aria-hidden="true" tabindex="-1"></a>            labour_processed_cutted.<span class="bu">filter</span>(</span>
+<span id="cb8-229"><a href="#cb8-229" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-230"><a href="#cb8-230" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb8-231"><a href="#cb8-231" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-232"><a href="#cb8-232" aria-hidden="true" tabindex="-1"></a>        aes(</span>
+<span id="cb8-233"><a href="#cb8-233" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="st">"DATE_YMD"</span>,</span>
+<span id="cb8-234"><a href="#cb8-234" aria-hidden="true" tabindex="-1"></a>            y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>,</span>
+<span id="cb8-235"><a href="#cb8-235" aria-hidden="true" tabindex="-1"></a>            fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>,  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-236"><a href="#cb8-236" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-237"><a href="#cb8-237" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-238"><a href="#cb8-238" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(height<span class="op">=</span><span class="fl">0.95</span>) </span>
+<span id="cb8-239"><a href="#cb8-239" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
+<span id="cb8-240"><a href="#cb8-240" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
+<span id="cb8-241"><a href="#cb8-241" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-242"><a href="#cb8-242" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-243"><a href="#cb8-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-244"><a href="#cb8-244" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Here, <span class="in">`plotnine`</span> sees that we mapped a categorical variable to <span class="in">`fill`</span>, so it uses a default palette that isn't necessarily optimized for the continuous (ie. ordinal) nature of bins. Making matters worst, we can see that the categories are not even by default ordered correctly from negative to most positive.</span>
 <span id="cb8-245"><a href="#cb8-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-246"><a href="#cb8-246" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Here, <span class="in">`plotnine`</span> sees that we mapped a categorical variable to <span class="in">`fill`</span>, so it uses a default palette that isn't necessarily optimized for the continuous (ie. ordinal) nature of bins. Making matters worst, we can see that the categories are not even by default ordered correctly from negative to most positive.</span>
+<span id="cb8-246"><a href="#cb8-246" aria-hidden="true" tabindex="-1"></a>It's definitely uglier, not nicer. But that's ok, it gives us finer control, and we're going to use that to fix this issue in the next section...</span>
 <span id="cb8-247"><a href="#cb8-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-248"><a href="#cb8-248" aria-hidden="true" tabindex="-1"></a>It's definitely uglier, not nicer. But that's ok, it gives us finer control, and we're going to use that to fix this issue in the next section...</span>
+<span id="cb8-248"><a href="#cb8-248" aria-hidden="true" tabindex="-1"></a><span class="fu">### `scale_fill_manual` for explicit color mapping</span></span>
 <span id="cb8-249"><a href="#cb8-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-250"><a href="#cb8-250" aria-hidden="true" tabindex="-1"></a><span class="fu">### `scale_fill_manual` for explicit color mapping</span></span>
+<span id="cb8-250"><a href="#cb8-250" aria-hidden="true" tabindex="-1"></a>Now we need to order the levels, and map to a specific color palette.</span>
 <span id="cb8-251"><a href="#cb8-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-252"><a href="#cb8-252" aria-hidden="true" tabindex="-1"></a>Now we need to order the levels, and map to a specific color palette.</span>
+<span id="cb8-252"><a href="#cb8-252" aria-hidden="true" tabindex="-1"></a>We will make <span class="in">`PDIFF=0%`</span> (no change) to be gray, positive values to have <span class="in">`green`</span> and <span class="in">`blue`</span> colors (*growth* = *good*), and negative values to be `red` and `orange` (*contraction* = *bad*) colors.</span>
 <span id="cb8-253"><a href="#cb8-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-254"><a href="#cb8-254" aria-hidden="true" tabindex="-1"></a>We will make <span class="in">`PDIFF=0%`</span> (no change) to be gray, positive values to have <span class="in">`green`</span> and <span class="in">`blue`</span> colors (*growth* = *good*), and negative values to be `red` and `orange` (*contraction* = *bad*) colors.</span>
-<span id="cb8-255"><a href="#cb8-255" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-258"><a href="#cb8-258" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-259"><a href="#cb8-259" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> (</span>
-<span id="cb8-260"><a href="#cb8-260" aria-hidden="true" tabindex="-1"></a>    labour_processed_cutted.drop_nulls()</span>
-<span id="cb8-261"><a href="#cb8-261" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"PDIFF"</span>)</span>
-<span id="cb8-262"><a href="#cb8-262" aria-hidden="true" tabindex="-1"></a>    .select(pl.col(<span class="st">"PDIFF_BINNED"</span>))</span>
-<span id="cb8-263"><a href="#cb8-263" aria-hidden="true" tabindex="-1"></a>    .unique(maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb8-264"><a href="#cb8-264" aria-hidden="true" tabindex="-1"></a>    .to_series()</span>
-<span id="cb8-265"><a href="#cb8-265" aria-hidden="true" tabindex="-1"></a>    .to_list()</span>
-<span id="cb8-266"><a href="#cb8-266" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-267"><a href="#cb8-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-268"><a href="#cb8-268" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted_ordered <span class="op">=</span> labour_processed_cutted.with_columns(</span>
-<span id="cb8-269"><a href="#cb8-269" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"PDIFF_BINNED"</span>).cast(pl.Enum(order))</span>
-<span id="cb8-270"><a href="#cb8-270" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-271"><a href="#cb8-271" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-272"><a href="#cb8-272" aria-hidden="true" tabindex="-1"></a>color_mapping <span class="op">=</span> {  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-273"><a href="#cb8-273" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-inf, -0.05]"</span>: <span class="st">"#d82828ff"</span>,</span>
-<span id="cb8-274"><a href="#cb8-274" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.05, -0.025]"</span>: <span class="st">"#fa6f1fff"</span>,</span>
-<span id="cb8-275"><a href="#cb8-275" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.025, -0.012]"</span>: <span class="st">"#f1874aff"</span>,</span>
-<span id="cb8-276"><a href="#cb8-276" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.012, -0.008]"</span>: <span class="st">"#f1b274ff"</span>,</span>
-<span id="cb8-277"><a href="#cb8-277" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.008, -0.004]"</span>: <span class="st">"#FEE08B"</span>,</span>
-<span id="cb8-278"><a href="#cb8-278" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.004, 0]"</span>: <span class="st">"#FFFFBF"</span>,</span>
-<span id="cb8-279"><a href="#cb8-279" aria-hidden="true" tabindex="-1"></a>    <span class="st">"0"</span>: <span class="st">"#a8a8a8ff"</span>,</span>
-<span id="cb8-280"><a href="#cb8-280" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0, 0.004]"</span>: <span class="st">"#E6F5D0"</span>,</span>
-<span id="cb8-281"><a href="#cb8-281" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.004, 0.008]"</span>: <span class="st">"#bce091ff"</span>,</span>
-<span id="cb8-282"><a href="#cb8-282" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.008, 0.012]"</span>: <span class="st">"#9ad65fff"</span>,</span>
-<span id="cb8-283"><a href="#cb8-283" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.012, 0.025]"</span>: <span class="st">"#78b552ff"</span>,</span>
-<span id="cb8-284"><a href="#cb8-284" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.025, 0.05]"</span>: <span class="st">"#5cb027ff"</span>,</span>
-<span id="cb8-285"><a href="#cb8-285" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.05, inf]"</span>: <span class="st">"#1f6fc6ff"</span>,</span>
-<span id="cb8-286"><a href="#cb8-286" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-287"><a href="#cb8-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-288"><a href="#cb8-288" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-289"><a href="#cb8-289" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-290"><a href="#cb8-290" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb8-291"><a href="#cb8-291" aria-hidden="true" tabindex="-1"></a>            labour_processed_cutted.<span class="bu">filter</span>(</span>
-<span id="cb8-292"><a href="#cb8-292" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-293"><a href="#cb8-293" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb8-294"><a href="#cb8-294" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-295"><a href="#cb8-295" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>), </span>
-<span id="cb8-296"><a href="#cb8-296" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-297"><a href="#cb8-297" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb8-298"><a href="#cb8-298" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
-<span id="cb8-299"><a href="#cb8-299" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
-<span id="cb8-300"><a href="#cb8-300" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order) <span class="co"># &lt;2&gt;</span></span>
-<span id="cb8-301"><a href="#cb8-301" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-302"><a href="#cb8-302" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb8-303"><a href="#cb8-303" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-304"><a href="#cb8-304" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>First, we define a dictionary that specifies an explicit mapping of bins to color</span>
-<span id="cb8-305"><a href="#cb8-305" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Then, we provide the dictionary to <span class="in">`values`</span> in <span class="in">`scale_fill_manual`</span></span>
+<span id="cb8-256"><a href="#cb8-256" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-257"><a href="#cb8-257" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> (</span>
+<span id="cb8-258"><a href="#cb8-258" aria-hidden="true" tabindex="-1"></a>    labour_processed_cutted.drop_nulls()</span>
+<span id="cb8-259"><a href="#cb8-259" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"PDIFF"</span>)</span>
+<span id="cb8-260"><a href="#cb8-260" aria-hidden="true" tabindex="-1"></a>    .select(pl.col(<span class="st">"PDIFF_BINNED"</span>))</span>
+<span id="cb8-261"><a href="#cb8-261" aria-hidden="true" tabindex="-1"></a>    .unique(maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-262"><a href="#cb8-262" aria-hidden="true" tabindex="-1"></a>    .to_series()</span>
+<span id="cb8-263"><a href="#cb8-263" aria-hidden="true" tabindex="-1"></a>    .to_list()</span>
+<span id="cb8-264"><a href="#cb8-264" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-265"><a href="#cb8-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-266"><a href="#cb8-266" aria-hidden="true" tabindex="-1"></a>labour_processed_cutted_ordered <span class="op">=</span> labour_processed_cutted.with_columns(</span>
+<span id="cb8-267"><a href="#cb8-267" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"PDIFF_BINNED"</span>).cast(pl.Enum(order))</span>
+<span id="cb8-268"><a href="#cb8-268" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-269"><a href="#cb8-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-270"><a href="#cb8-270" aria-hidden="true" tabindex="-1"></a>color_mapping <span class="op">=</span> {  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-271"><a href="#cb8-271" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-inf, -0.05]"</span>: <span class="st">"#d82828ff"</span>,</span>
+<span id="cb8-272"><a href="#cb8-272" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.05, -0.025]"</span>: <span class="st">"#fa6f1fff"</span>,</span>
+<span id="cb8-273"><a href="#cb8-273" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.025, -0.012]"</span>: <span class="st">"#f1874aff"</span>,</span>
+<span id="cb8-274"><a href="#cb8-274" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.012, -0.008]"</span>: <span class="st">"#f1b274ff"</span>,</span>
+<span id="cb8-275"><a href="#cb8-275" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.008, -0.004]"</span>: <span class="st">"#FEE08B"</span>,</span>
+<span id="cb8-276"><a href="#cb8-276" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(-0.004, 0]"</span>: <span class="st">"#FFFFBF"</span>,</span>
+<span id="cb8-277"><a href="#cb8-277" aria-hidden="true" tabindex="-1"></a>    <span class="st">"0"</span>: <span class="st">"#a8a8a8ff"</span>,</span>
+<span id="cb8-278"><a href="#cb8-278" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0, 0.004]"</span>: <span class="st">"#E6F5D0"</span>,</span>
+<span id="cb8-279"><a href="#cb8-279" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.004, 0.008]"</span>: <span class="st">"#bce091ff"</span>,</span>
+<span id="cb8-280"><a href="#cb8-280" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.008, 0.012]"</span>: <span class="st">"#9ad65fff"</span>,</span>
+<span id="cb8-281"><a href="#cb8-281" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.012, 0.025]"</span>: <span class="st">"#78b552ff"</span>,</span>
+<span id="cb8-282"><a href="#cb8-282" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.025, 0.05]"</span>: <span class="st">"#5cb027ff"</span>,</span>
+<span id="cb8-283"><a href="#cb8-283" aria-hidden="true" tabindex="-1"></a>    <span class="st">"(0.05, inf]"</span>: <span class="st">"#1f6fc6ff"</span>,</span>
+<span id="cb8-284"><a href="#cb8-284" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-285"><a href="#cb8-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-286"><a href="#cb8-286" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-287"><a href="#cb8-287" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-288"><a href="#cb8-288" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb8-289"><a href="#cb8-289" aria-hidden="true" tabindex="-1"></a>            labour_processed_cutted.<span class="bu">filter</span>(</span>
+<span id="cb8-290"><a href="#cb8-290" aria-hidden="true" tabindex="-1"></a>                pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-291"><a href="#cb8-291" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb8-292"><a href="#cb8-292" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-293"><a href="#cb8-293" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>), </span>
+<span id="cb8-294"><a href="#cb8-294" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-295"><a href="#cb8-295" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb8-296"><a href="#cb8-296" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
+<span id="cb8-297"><a href="#cb8-297" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(figure_size<span class="op">=</span>FIGURE_THEME_SIZE, axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>))</span>
+<span id="cb8-298"><a href="#cb8-298" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order) <span class="co"># &lt;2&gt;</span></span>
+<span id="cb8-299"><a href="#cb8-299" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-300"><a href="#cb8-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-301"><a href="#cb8-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-302"><a href="#cb8-302" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>First, we define a dictionary that specifies an explicit mapping of bins to color</span>
+<span id="cb8-303"><a href="#cb8-303" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Then, we provide the dictionary to <span class="in">`values`</span> in <span class="in">`scale_fill_manual`</span></span>
+<span id="cb8-304"><a href="#cb8-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-305"><a href="#cb8-305" aria-hidden="true" tabindex="-1"></a>Now we have a much nicer looking color palette for our graphic. This process illustrates a few things:</span>
 <span id="cb8-306"><a href="#cb8-306" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-307"><a href="#cb8-307" aria-hidden="true" tabindex="-1"></a>Now we have a much nicer looking color palette for our graphic. This process illustrates a few things:</span>
-<span id="cb8-308"><a href="#cb8-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-309"><a href="#cb8-309" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`scale_fill_gradient2`</span> </span>
-<span id="cb8-310"><a href="#cb8-310" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Worked well "out-of-the-box" </span>
-<span id="cb8-311"><a href="#cb8-311" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>But is limited for more fine-grained control over the gradient</span>
-<span id="cb8-312"><a href="#cb8-312" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`scale_fill_manual`</span> plus our binning procedure </span>
-<span id="cb8-313"><a href="#cb8-313" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>allows us to explicitly control how color is mapped to the data. </span>
-<span id="cb8-314"><a href="#cb8-314" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>For example, this approach allows us to highlight more extreme values with how we define extreme (e.g. &gt;+5%, &lt;-5%), or non significant data (0% no change)</span>
-<span id="cb8-315"><a href="#cb8-315" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>But the cost was that it takes a lot more effort and lines of code </span>
+<span id="cb8-307"><a href="#cb8-307" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`scale_fill_gradient2`</span> </span>
+<span id="cb8-308"><a href="#cb8-308" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Worked well "out-of-the-box" </span>
+<span id="cb8-309"><a href="#cb8-309" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>But is limited for more fine-grained control over the gradient</span>
+<span id="cb8-310"><a href="#cb8-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`scale_fill_manual`</span> plus our binning procedure </span>
+<span id="cb8-311"><a href="#cb8-311" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>allows us to explicitly control how color is mapped to the data. </span>
+<span id="cb8-312"><a href="#cb8-312" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>For example, this approach allows us to highlight more extreme values with how we define extreme (e.g. &gt;+5%, &lt;-5%), or non significant data (0% no change)</span>
+<span id="cb8-313"><a href="#cb8-313" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>But the cost was that it takes a lot more effort and lines of code </span>
+<span id="cb8-314"><a href="#cb8-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-315"><a href="#cb8-315" aria-hidden="true" tabindex="-1"></a><span class="fu">## Customizing the `plotnine` legend</span></span>
 <span id="cb8-316"><a href="#cb8-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-317"><a href="#cb8-317" aria-hidden="true" tabindex="-1"></a><span class="fu">## Customizing the `plotnine` legend</span></span>
+<span id="cb8-317"><a href="#cb8-317" aria-hidden="true" tabindex="-1"></a>... which in its current form, is mathematically accurate, but we can make it much nicer to look at.</span>
 <span id="cb8-318"><a href="#cb8-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-319"><a href="#cb8-319" aria-hidden="true" tabindex="-1"></a>... which in its current form, is mathematically accurate, but we can make it much nicer to look at.</span>
+<span id="cb8-319"><a href="#cb8-319" aria-hidden="true" tabindex="-1"></a>Let's start by making the text more concise: </span>
 <span id="cb8-320"><a href="#cb8-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-321"><a href="#cb8-321" aria-hidden="true" tabindex="-1"></a>Let's start by making the text more concise: </span>
-<span id="cb8-322"><a href="#cb8-322" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-323"><a href="#cb8-323" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>We don't need every bin to be labelled </span>
-<span id="cb8-324"><a href="#cb8-324" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Instead of listing the range, we can just describe the midpoint</span>
-<span id="cb8-325"><a href="#cb8-325" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-328"><a href="#cb8-328" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-329"><a href="#cb8-329" aria-hidden="true" tabindex="-1"></a>legend_labels <span class="op">=</span> [  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-330"><a href="#cb8-330" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-5%"</span>,  <span class="co"># the ends can be labelled with the boundary e.g. implies &lt;-5%</span></span>
-<span id="cb8-331"><a href="#cb8-331" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
+<span id="cb8-321"><a href="#cb8-321" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>We don't need every bin to be labelled </span>
+<span id="cb8-322"><a href="#cb8-322" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Instead of listing the range, we can just describe the midpoint</span>
+<span id="cb8-323"><a href="#cb8-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-326"><a href="#cb8-326" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-327"><a href="#cb8-327" aria-hidden="true" tabindex="-1"></a>legend_labels <span class="op">=</span> [  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-328"><a href="#cb8-328" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-5%"</span>,  <span class="co"># the ends can be labelled with the boundary e.g. implies &lt;-5%</span></span>
+<span id="cb8-329"><a href="#cb8-329" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
+<span id="cb8-330"><a href="#cb8-330" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
+<span id="cb8-331"><a href="#cb8-331" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-1%"</span>,</span>
 <span id="cb8-332"><a href="#cb8-332" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
-<span id="cb8-333"><a href="#cb8-333" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-1%"</span>,</span>
-<span id="cb8-334"><a href="#cb8-334" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
+<span id="cb8-333"><a href="#cb8-333" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
+<span id="cb8-334"><a href="#cb8-334" aria-hidden="true" tabindex="-1"></a>    <span class="st">"No change"</span>,</span>
 <span id="cb8-335"><a href="#cb8-335" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
-<span id="cb8-336"><a href="#cb8-336" aria-hidden="true" tabindex="-1"></a>    <span class="st">"No change"</span>,</span>
+<span id="cb8-336"><a href="#cb8-336" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
 <span id="cb8-337"><a href="#cb8-337" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
-<span id="cb8-338"><a href="#cb8-338" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
+<span id="cb8-338"><a href="#cb8-338" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1%"</span>,</span>
 <span id="cb8-339"><a href="#cb8-339" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
-<span id="cb8-340"><a href="#cb8-340" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1%"</span>,</span>
-<span id="cb8-341"><a href="#cb8-341" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>,</span>
-<span id="cb8-342"><a href="#cb8-342" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5%"</span>,</span>
-<span id="cb8-343"><a href="#cb8-343" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb8-344"><a href="#cb8-344" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-345"><a href="#cb8-345" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-346"><a href="#cb8-346" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-347"><a href="#cb8-347" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
-<span id="cb8-348"><a href="#cb8-348" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-349"><a href="#cb8-349" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-350"><a href="#cb8-350" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>),</span>
-<span id="cb8-351"><a href="#cb8-351" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-352"><a href="#cb8-352" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb8-353"><a href="#cb8-353" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
-<span id="cb8-354"><a href="#cb8-354" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb8-355"><a href="#cb8-355" aria-hidden="true" tabindex="-1"></a>        figure_size<span class="op">=</span>FIGURE_THEME_SIZE,</span>
-<span id="cb8-356"><a href="#cb8-356" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>),</span>
-<span id="cb8-357"><a href="#cb8-357" aria-hidden="true" tabindex="-1"></a>        legend_justification_right<span class="op">=</span><span class="dv">1</span>,</span>
-<span id="cb8-358"><a href="#cb8-358" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=</span><span class="st">"right"</span>,</span>
-<span id="cb8-359"><a href="#cb8-359" aria-hidden="true" tabindex="-1"></a>        legend_text_position<span class="op">=</span><span class="st">"right"</span>,</span>
-<span id="cb8-360"><a href="#cb8-360" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
-<span id="cb8-361"><a href="#cb8-361" aria-hidden="true" tabindex="-1"></a>        legend_key_spacing<span class="op">=</span><span class="dv">0</span>,</span>
-<span id="cb8-362"><a href="#cb8-362" aria-hidden="true" tabindex="-1"></a>        legend_key_width<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb8-363"><a href="#cb8-363" aria-hidden="true" tabindex="-1"></a>        legend_key_height<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb8-364"><a href="#cb8-364" aria-hidden="true" tabindex="-1"></a>        legend_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">8</span>),</span>
-<span id="cb8-365"><a href="#cb8-365" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-366"><a href="#cb8-366" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(  <span class="co"># &lt;2&gt;</span></span>
-<span id="cb8-367"><a href="#cb8-367" aria-hidden="true" tabindex="-1"></a>        values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order, labels<span class="op">=</span>legend_labels</span>
-<span id="cb8-368"><a href="#cb8-368" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-369"><a href="#cb8-369" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-370"><a href="#cb8-370" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb8-371"><a href="#cb8-371" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-372"><a href="#cb8-372" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Similar to <span class="in">`values`</span>, for <span class="in">`labels`</span> we define a list that is the same length as the <span class="in">`breaks`</span></span>
-<span id="cb8-373"><a href="#cb8-373" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>And then we provide the list <span class="in">`legend_labels`</span> to <span class="in">`scale_fill_manual`</span></span>
-<span id="cb8-374"><a href="#cb8-374" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-375"><a href="#cb8-375" aria-hidden="true" tabindex="-1"></a>The legend looks a lot nicer, and easier to immediately grasp the range of the data. Even though I originally wanted to make a <span class="co">[</span><span class="ot">horizontal legend</span><span class="co">](03_things_that_didnt_work.qmd#horizontal-legend-with-horizontal-legend-text)</span>, this vertical version is a lot easier to implement and looks equally good.</span>
-<span id="cb8-376"><a href="#cb8-376" aria-hidden="true" tabindex="-1"></a><span class="fu">## Text and fonts</span></span>
+<span id="cb8-340"><a href="#cb8-340" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5%"</span>,</span>
+<span id="cb8-341"><a href="#cb8-341" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-342"><a href="#cb8-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-343"><a href="#cb8-343" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-344"><a href="#cb8-344" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-345"><a href="#cb8-345" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
+<span id="cb8-346"><a href="#cb8-346" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-347"><a href="#cb8-347" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-348"><a href="#cb8-348" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>),</span>
+<span id="cb8-349"><a href="#cb8-349" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-350"><a href="#cb8-350" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb8-351"><a href="#cb8-351" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
+<span id="cb8-352"><a href="#cb8-352" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
+<span id="cb8-353"><a href="#cb8-353" aria-hidden="true" tabindex="-1"></a>        figure_size<span class="op">=</span>FIGURE_THEME_SIZE,</span>
+<span id="cb8-354"><a href="#cb8-354" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">90</span>),</span>
+<span id="cb8-355"><a href="#cb8-355" aria-hidden="true" tabindex="-1"></a>        legend_justification_right<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb8-356"><a href="#cb8-356" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=</span><span class="st">"right"</span>,</span>
+<span id="cb8-357"><a href="#cb8-357" aria-hidden="true" tabindex="-1"></a>        legend_text_position<span class="op">=</span><span class="st">"right"</span>,</span>
+<span id="cb8-358"><a href="#cb8-358" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
+<span id="cb8-359"><a href="#cb8-359" aria-hidden="true" tabindex="-1"></a>        legend_key_spacing<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb8-360"><a href="#cb8-360" aria-hidden="true" tabindex="-1"></a>        legend_key_width<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb8-361"><a href="#cb8-361" aria-hidden="true" tabindex="-1"></a>        legend_key_height<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb8-362"><a href="#cb8-362" aria-hidden="true" tabindex="-1"></a>        legend_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">8</span>),</span>
+<span id="cb8-363"><a href="#cb8-363" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-364"><a href="#cb8-364" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(  <span class="co"># &lt;2&gt;</span></span>
+<span id="cb8-365"><a href="#cb8-365" aria-hidden="true" tabindex="-1"></a>        values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order, labels<span class="op">=</span>legend_labels</span>
+<span id="cb8-366"><a href="#cb8-366" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-367"><a href="#cb8-367" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-368"><a href="#cb8-368" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-369"><a href="#cb8-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-370"><a href="#cb8-370" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Similar to <span class="in">`values`</span>, for <span class="in">`labels`</span> we define a list that is the same length as the <span class="in">`breaks`</span></span>
+<span id="cb8-371"><a href="#cb8-371" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>And then we provide the list <span class="in">`legend_labels`</span> to <span class="in">`scale_fill_manual`</span></span>
+<span id="cb8-372"><a href="#cb8-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-373"><a href="#cb8-373" aria-hidden="true" tabindex="-1"></a>The legend looks a lot nicer, and easier to immediately grasp the range of the data. Even though I originally wanted to make a <span class="co">[</span><span class="ot">horizontal legend</span><span class="co">](03_things_that_didnt_work.qmd#horizontal-legend-with-horizontal-legend-text)</span>, this vertical version is a lot easier to implement and looks equally good.</span>
+<span id="cb8-374"><a href="#cb8-374" aria-hidden="true" tabindex="-1"></a><span class="fu">## Text and fonts</span></span>
+<span id="cb8-375"><a href="#cb8-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-376"><a href="#cb8-376" aria-hidden="true" tabindex="-1"></a>Next up is the text and fonts. I played with a few fonts on <span class="co">[</span><span class="ot">google fonts</span><span class="co">](https://fonts.google.com/)</span> before settling on two. </span>
 <span id="cb8-377"><a href="#cb8-377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-378"><a href="#cb8-378" aria-hidden="true" tabindex="-1"></a>Next up is the text and fonts. I played with a few fonts on <span class="co">[</span><span class="ot">google fonts</span><span class="co">](https://fonts.google.com/)</span> before settling on two. </span>
+<span id="cb8-378"><a href="#cb8-378" aria-hidden="true" tabindex="-1"></a>Install the fonts:</span>
 <span id="cb8-379"><a href="#cb8-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-380"><a href="#cb8-380" aria-hidden="true" tabindex="-1"></a>Install the fonts:</span>
-<span id="cb8-381"><a href="#cb8-381" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-384"><a href="#cb8-384" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-385"><a href="#cb8-385" aria-hidden="true" tabindex="-1"></a>FONT_PRIMARY <span class="op">=</span> <span class="st">"Playfair Display"</span></span>
-<span id="cb8-386"><a href="#cb8-386" aria-hidden="true" tabindex="-1"></a>FONT_SECONDARY <span class="op">=</span> <span class="st">"Lato"</span></span>
-<span id="cb8-387"><a href="#cb8-387" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mpl_fontkit <span class="im">as</span> fk</span>
-<span id="cb8-388"><a href="#cb8-388" aria-hidden="true" tabindex="-1"></a>fk.install(FONT_PRIMARY)</span>
-<span id="cb8-389"><a href="#cb8-389" aria-hidden="true" tabindex="-1"></a>fk.install(FONT_SECONDARY)</span>
-<span id="cb8-390"><a href="#cb8-390" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-382"><a href="#cb8-382" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-383"><a href="#cb8-383" aria-hidden="true" tabindex="-1"></a>FONT_PRIMARY <span class="op">=</span> <span class="st">"Playfair Display"</span></span>
+<span id="cb8-384"><a href="#cb8-384" aria-hidden="true" tabindex="-1"></a>FONT_SECONDARY <span class="op">=</span> <span class="st">"Lato"</span></span>
+<span id="cb8-385"><a href="#cb8-385" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mpl_fontkit <span class="im">as</span> fk</span>
+<span id="cb8-386"><a href="#cb8-386" aria-hidden="true" tabindex="-1"></a>fk.install(FONT_PRIMARY)</span>
+<span id="cb8-387"><a href="#cb8-387" aria-hidden="true" tabindex="-1"></a>fk.install(FONT_SECONDARY)</span>
+<span id="cb8-388"><a href="#cb8-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-389"><a href="#cb8-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-390"><a href="#cb8-390" aria-hidden="true" tabindex="-1"></a><span class="fu">### Consistent theming with Brand.yml</span></span>
 <span id="cb8-391"><a href="#cb8-391" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-392"><a href="#cb8-392" aria-hidden="true" tabindex="-1"></a><span class="fu">### Consistent theming with Brand.yml</span></span>
+<span id="cb8-392"><a href="#cb8-392" aria-hidden="true" tabindex="-1"></a>Alternatively, if we utilize  <span class="co">[</span><span class="ot">`brand.yml`</span><span class="co">](https://posit-dev.github.io/brand-yml/)</span>, we can pull these settings directly from it. </span>
 <span id="cb8-393"><a href="#cb8-393" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-394"><a href="#cb8-394" aria-hidden="true" tabindex="-1"></a>Alternatively, if we utilize  <span class="co">[</span><span class="ot">`brand.yml`</span><span class="co">](https://posit-dev.github.io/brand-yml/)</span>, we can pull these settings directly from it. </span>
-<span id="cb8-395"><a href="#cb8-395" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-398"><a href="#cb8-398" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-399"><a href="#cb8-399" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> brand_yml <span class="im">import</span> Brand</span>
-<span id="cb8-400"><a href="#cb8-400" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-401"><a href="#cb8-401" aria-hidden="true" tabindex="-1"></a>BRAND <span class="op">=</span> Brand.from_yaml(here())</span>
-<span id="cb8-402"><a href="#cb8-402" aria-hidden="true" tabindex="-1"></a>FONT_PRIMARY <span class="op">=</span> BRAND.typography.base.model_dump()[<span class="st">"family"</span>]  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-403"><a href="#cb8-403" aria-hidden="true" tabindex="-1"></a>COLOR_BACKGROUND <span class="op">=</span> BRAND.color.background  <span class="co"># &lt;2&gt;</span></span>
-<span id="cb8-404"><a href="#cb8-404" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-396"><a href="#cb8-396" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-397"><a href="#cb8-397" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> brand_yml <span class="im">import</span> Brand</span>
+<span id="cb8-398"><a href="#cb8-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-399"><a href="#cb8-399" aria-hidden="true" tabindex="-1"></a>BRAND <span class="op">=</span> Brand.from_yaml(here())</span>
+<span id="cb8-400"><a href="#cb8-400" aria-hidden="true" tabindex="-1"></a>FONT_PRIMARY <span class="op">=</span> BRAND.typography.base.model_dump()[<span class="st">"family"</span>]  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-401"><a href="#cb8-401" aria-hidden="true" tabindex="-1"></a>COLOR_BACKGROUND <span class="op">=</span> BRAND.color.background  <span class="co"># &lt;2&gt;</span></span>
+<span id="cb8-402"><a href="#cb8-402" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-403"><a href="#cb8-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-404"><a href="#cb8-404" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
 <span id="cb8-405"><a href="#cb8-405" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-406"><a href="#cb8-406" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb8-406"><a href="#cb8-406" aria-hidden="true" tabindex="-1"></a>We can also connect other components like using the the brand's color as our plot background, which will make it the same as the surrounding background from our quarto website. </span>
 <span id="cb8-407"><a href="#cb8-407" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-408"><a href="#cb8-408" aria-hidden="true" tabindex="-1"></a>We can also connect other components like using the the brand's color as our plot background, which will make it the same as the surrounding background from our quarto website. </span>
-<span id="cb8-409"><a href="#cb8-409" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-410"><a href="#cb8-410" aria-hidden="true" tabindex="-1"></a>See this project's brand.yml <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/wvictor14/labourcan/blob/main/_brand.yml)</span></span>
-<span id="cb8-411"><a href="#cb8-411" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb8-412"><a href="#cb8-412" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-413"><a href="#cb8-413" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Import the brand data and extract the <span class="in">`family`</span> from <span class="in">`typography`</span></span>
-<span id="cb8-414"><a href="#cb8-414" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Import other components, e.g. <span class="in">`color`</span></span>
+<span id="cb8-408"><a href="#cb8-408" aria-hidden="true" tabindex="-1"></a>See this project's brand.yml <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/wvictor14/labourcan/blob/main/_brand.yml)</span></span>
+<span id="cb8-409"><a href="#cb8-409" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb8-410"><a href="#cb8-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-411"><a href="#cb8-411" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Import the brand data and extract the <span class="in">`family`</span> from <span class="in">`typography`</span></span>
+<span id="cb8-412"><a href="#cb8-412" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Import other components, e.g. <span class="in">`color`</span></span>
+<span id="cb8-413"><a href="#cb8-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-414"><a href="#cb8-414" aria-hidden="true" tabindex="-1"></a>This is convenient because if we want to change the font we can just edit the brand.yml configuration, and these changes will automatically propagate throughout any connected document like this one. </span>
 <span id="cb8-415"><a href="#cb8-415" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-416"><a href="#cb8-416" aria-hidden="true" tabindex="-1"></a>This is convenient because if we want to change the font we can just edit the brand.yml configuration, and these changes will automatically propagate throughout any connected document like this one. </span>
+<span id="cb8-416"><a href="#cb8-416" aria-hidden="true" tabindex="-1"></a><span class="fu">### `mizani` for axis breaks and labels</span></span>
 <span id="cb8-417"><a href="#cb8-417" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-418"><a href="#cb8-418" aria-hidden="true" tabindex="-1"></a><span class="fu">### `mizani` for axis breaks and labels</span></span>
+<span id="cb8-418"><a href="#cb8-418" aria-hidden="true" tabindex="-1"></a>The axis breaks and labels for Plotnine graphs can be easily customized using  <span class="co">[</span><span class="ot">`mizani`</span><span class="co">](https://mizani.readthedocs.io/en/stable/)</span>, which is ggplot2's <span class="co">[</span><span class="ot">scales</span><span class="co">](https://scales.r-lib.org/)</span> package for python.</span>
 <span id="cb8-419"><a href="#cb8-419" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-420"><a href="#cb8-420" aria-hidden="true" tabindex="-1"></a>The axis breaks and labels for Plotnine graphs can be easily customized using  <span class="co">[</span><span class="ot">`mizani`</span><span class="co">](https://mizani.readthedocs.io/en/stable/)</span>, which is ggplot2's <span class="co">[</span><span class="ot">scales</span><span class="co">](https://scales.r-lib.org/)</span> package for python.</span>
+<span id="cb8-420"><a href="#cb8-420" aria-hidden="true" tabindex="-1"></a>We're going to use <span class="in">`mizani.breaks.breaks_date_width`</span> so that the x-axis shows each year, and <span class="in">`mizani.labels.label_date`</span> to drop the "month" part of the date. </span>
 <span id="cb8-421"><a href="#cb8-421" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-422"><a href="#cb8-422" aria-hidden="true" tabindex="-1"></a>We're going to use <span class="in">`mizani.breaks.breaks_date_width`</span> so that the x-axis shows each year, and <span class="in">`mizani.labels.label_date`</span> to drop the "month" part of the date. </span>
-<span id="cb8-423"><a href="#cb8-423" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-426"><a href="#cb8-426" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-427"><a href="#cb8-427" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.labels <span class="im">as</span> ml</span>
-<span id="cb8-428"><a href="#cb8-428" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.breaks <span class="im">as</span> mb</span>
-<span id="cb8-429"><a href="#cb8-429" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-430"><a href="#cb8-430" aria-hidden="true" tabindex="-1"></a>plot <span class="op">=</span> (</span>
-<span id="cb8-431"><a href="#cb8-431" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-432"><a href="#cb8-432" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
-<span id="cb8-433"><a href="#cb8-433" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-434"><a href="#cb8-434" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-435"><a href="#cb8-435" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>),</span>
-<span id="cb8-436"><a href="#cb8-436" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-437"><a href="#cb8-437" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>, height<span class="op">=</span><span class="fl">0.95</span>)</span>
-<span id="cb8-438"><a href="#cb8-438" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
-<span id="cb8-439"><a href="#cb8-439" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb8-440"><a href="#cb8-440" aria-hidden="true" tabindex="-1"></a>        text<span class="op">=</span>element_text(family<span class="op">=</span>FONT_PRIMARY),  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-441"><a href="#cb8-441" aria-hidden="true" tabindex="-1"></a>        figure_size<span class="op">=</span>FIGURE_THEME_SIZE,</span>
-<span id="cb8-442"><a href="#cb8-442" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-443"><a href="#cb8-443" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-444"><a href="#cb8-444" aria-hidden="true" tabindex="-1"></a>        axis_title_y<span class="op">=</span>element_text(weight<span class="op">=</span><span class="dv">300</span>),</span>
-<span id="cb8-445"><a href="#cb8-445" aria-hidden="true" tabindex="-1"></a>        legend_justification_right<span class="op">=</span><span class="dv">1</span>,</span>
-<span id="cb8-446"><a href="#cb8-446" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=</span><span class="st">"right"</span>,</span>
-<span id="cb8-447"><a href="#cb8-447" aria-hidden="true" tabindex="-1"></a>        legend_text_position<span class="op">=</span><span class="st">"right"</span>,</span>
-<span id="cb8-448"><a href="#cb8-448" aria-hidden="true" tabindex="-1"></a>        legend_title_position<span class="op">=</span><span class="st">"top"</span>,</span>
-<span id="cb8-449"><a href="#cb8-449" aria-hidden="true" tabindex="-1"></a>        legend_key_spacing<span class="op">=</span><span class="dv">0</span>,</span>
-<span id="cb8-450"><a href="#cb8-450" aria-hidden="true" tabindex="-1"></a>        legend_key_width<span class="op">=</span><span class="dv">15</span>,</span>
-<span id="cb8-451"><a href="#cb8-451" aria-hidden="true" tabindex="-1"></a>        legend_key_height<span class="op">=</span><span class="dv">15</span>,</span>
-<span id="cb8-452"><a href="#cb8-452" aria-hidden="true" tabindex="-1"></a>        legend_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">8</span>, family<span class="op">=</span>FONT_SECONDARY),  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-453"><a href="#cb8-453" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
-<span id="cb8-454"><a href="#cb8-454" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>),</span>
-<span id="cb8-455"><a href="#cb8-455" aria-hidden="true" tabindex="-1"></a>        plot_subtitle<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>, margin<span class="op">=</span>{<span class="st">"b"</span>: <span class="dv">1</span>, <span class="st">"units"</span>: <span class="st">"lines"</span>}),</span>
-<span id="cb8-456"><a href="#cb8-456" aria-hidden="true" tabindex="-1"></a>        plot_background<span class="op">=</span>element_rect(fill<span class="op">=</span>COLOR_BACKGROUND, color<span class="op">=</span>COLOR_BACKGROUND),</span>
-<span id="cb8-457"><a href="#cb8-457" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-458"><a href="#cb8-458" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order, labels<span class="op">=</span>legend_labels)</span>
-<span id="cb8-459"><a href="#cb8-459" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> guides(fill<span class="op">=</span>guide_legend(ncol<span class="op">=</span><span class="dv">1</span>, reverse<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb8-460"><a href="#cb8-460" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_datetime(</span>
-<span id="cb8-461"><a href="#cb8-461" aria-hidden="true" tabindex="-1"></a>        labels<span class="op">=</span>ml.label_date(<span class="st">"%Y"</span>),  <span class="co">#  &lt;2&gt;</span></span>
-<span id="cb8-462"><a href="#cb8-462" aria-hidden="true" tabindex="-1"></a>        expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
-<span id="cb8-463"><a href="#cb8-463" aria-hidden="true" tabindex="-1"></a>        breaks<span class="op">=</span>mb.breaks_date_width(<span class="st">"1 years"</span>),  <span class="co">#  &lt;2&gt;</span></span>
-<span id="cb8-464"><a href="#cb8-464" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-465"><a href="#cb8-465" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(  <span class="co"># &lt;3&gt;</span></span>
-<span id="cb8-466"><a href="#cb8-466" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Sector Shifts: Where Canada's Jobs Are Moving"</span>,</span>
-<span id="cb8-467"><a href="#cb8-467" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span>textwrap.fill(</span>
-<span id="cb8-468"><a href="#cb8-468" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels."</span>,</span>
-<span id="cb8-469"><a href="#cb8-469" aria-hidden="true" tabindex="-1"></a>            width<span class="op">=</span><span class="dv">75</span>,</span>
-<span id="cb8-470"><a href="#cb8-470" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-471"><a href="#cb8-471" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">""</span>,</span>
-<span id="cb8-472"><a href="#cb8-472" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"&lt; SECTORS FALLING            SECTORS RISING &gt;"</span>,</span>
-<span id="cb8-473"><a href="#cb8-473" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-474"><a href="#cb8-474" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-475"><a href="#cb8-475" aria-hidden="true" tabindex="-1"></a>plot</span>
-<span id="cb8-476"><a href="#cb8-476" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb8-477"><a href="#cb8-477" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-478"><a href="#cb8-478" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Apply font family changes to the primary font in <span class="in">`theme(...)`</span></span>
-<span id="cb8-479"><a href="#cb8-479" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Use <span class="in">`mizani`</span> to customize axis breaks and labels to show <span class="in">`year`</span></span>
-<span id="cb8-480"><a href="#cb8-480" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Add <span class="in">`title`</span>, <span class="in">`subtitle`</span> and wrap long lines with the help of <span class="in">`textwrap`</span></span>
+<span id="cb8-424"><a href="#cb8-424" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-425"><a href="#cb8-425" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.labels <span class="im">as</span> ml</span>
+<span id="cb8-426"><a href="#cb8-426" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.breaks <span class="im">as</span> mb</span>
+<span id="cb8-427"><a href="#cb8-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-428"><a href="#cb8-428" aria-hidden="true" tabindex="-1"></a>plot <span class="op">=</span> (</span>
+<span id="cb8-429"><a href="#cb8-429" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-430"><a href="#cb8-430" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
+<span id="cb8-431"><a href="#cb8-431" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-432"><a href="#cb8-432" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-433"><a href="#cb8-433" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>),</span>
+<span id="cb8-434"><a href="#cb8-434" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-435"><a href="#cb8-435" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>, height<span class="op">=</span><span class="fl">0.95</span>)</span>
+<span id="cb8-436"><a href="#cb8-436" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
+<span id="cb8-437"><a href="#cb8-437" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
+<span id="cb8-438"><a href="#cb8-438" aria-hidden="true" tabindex="-1"></a>        text<span class="op">=</span>element_text(family<span class="op">=</span>FONT_PRIMARY),  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-439"><a href="#cb8-439" aria-hidden="true" tabindex="-1"></a>        figure_size<span class="op">=</span>FIGURE_THEME_SIZE,</span>
+<span id="cb8-440"><a href="#cb8-440" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-441"><a href="#cb8-441" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-442"><a href="#cb8-442" aria-hidden="true" tabindex="-1"></a>        axis_title_y<span class="op">=</span>element_text(weight<span class="op">=</span><span class="dv">300</span>),</span>
+<span id="cb8-443"><a href="#cb8-443" aria-hidden="true" tabindex="-1"></a>        legend_justification_right<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb8-444"><a href="#cb8-444" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=</span><span class="st">"right"</span>,</span>
+<span id="cb8-445"><a href="#cb8-445" aria-hidden="true" tabindex="-1"></a>        legend_text_position<span class="op">=</span><span class="st">"right"</span>,</span>
+<span id="cb8-446"><a href="#cb8-446" aria-hidden="true" tabindex="-1"></a>        legend_title_position<span class="op">=</span><span class="st">"top"</span>,</span>
+<span id="cb8-447"><a href="#cb8-447" aria-hidden="true" tabindex="-1"></a>        legend_key_spacing<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb8-448"><a href="#cb8-448" aria-hidden="true" tabindex="-1"></a>        legend_key_width<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb8-449"><a href="#cb8-449" aria-hidden="true" tabindex="-1"></a>        legend_key_height<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb8-450"><a href="#cb8-450" aria-hidden="true" tabindex="-1"></a>        legend_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">8</span>, family<span class="op">=</span>FONT_SECONDARY),  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-451"><a href="#cb8-451" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
+<span id="cb8-452"><a href="#cb8-452" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>),</span>
+<span id="cb8-453"><a href="#cb8-453" aria-hidden="true" tabindex="-1"></a>        plot_subtitle<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>, margin<span class="op">=</span>{<span class="st">"b"</span>: <span class="dv">1</span>, <span class="st">"units"</span>: <span class="st">"lines"</span>}),</span>
+<span id="cb8-454"><a href="#cb8-454" aria-hidden="true" tabindex="-1"></a>        plot_background<span class="op">=</span>element_rect(fill<span class="op">=</span>COLOR_BACKGROUND, color<span class="op">=</span>COLOR_BACKGROUND),</span>
+<span id="cb8-455"><a href="#cb8-455" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-456"><a href="#cb8-456" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order, labels<span class="op">=</span>legend_labels)</span>
+<span id="cb8-457"><a href="#cb8-457" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> guides(fill<span class="op">=</span>guide_legend(ncol<span class="op">=</span><span class="dv">1</span>, reverse<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb8-458"><a href="#cb8-458" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_datetime(</span>
+<span id="cb8-459"><a href="#cb8-459" aria-hidden="true" tabindex="-1"></a>        labels<span class="op">=</span>ml.label_date(<span class="st">"%Y"</span>),  <span class="co">#  &lt;2&gt;</span></span>
+<span id="cb8-460"><a href="#cb8-460" aria-hidden="true" tabindex="-1"></a>        expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb8-461"><a href="#cb8-461" aria-hidden="true" tabindex="-1"></a>        breaks<span class="op">=</span>mb.breaks_date_width(<span class="st">"1 years"</span>),  <span class="co">#  &lt;2&gt;</span></span>
+<span id="cb8-462"><a href="#cb8-462" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-463"><a href="#cb8-463" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(  <span class="co"># &lt;3&gt;</span></span>
+<span id="cb8-464"><a href="#cb8-464" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Sector Shifts: Where Canada's Jobs Are Moving"</span>,</span>
+<span id="cb8-465"><a href="#cb8-465" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span>textwrap.fill(</span>
+<span id="cb8-466"><a href="#cb8-466" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Track the number of industries gaining or losing jobs each month. Boxes are shaded based on percentage change from previous month in each industry's employment levels."</span>,</span>
+<span id="cb8-467"><a href="#cb8-467" aria-hidden="true" tabindex="-1"></a>            width<span class="op">=</span><span class="dv">75</span>,</span>
+<span id="cb8-468"><a href="#cb8-468" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-469"><a href="#cb8-469" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">""</span>,</span>
+<span id="cb8-470"><a href="#cb8-470" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"&lt; SECTORS FALLING            SECTORS RISING &gt;"</span>,</span>
+<span id="cb8-471"><a href="#cb8-471" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-472"><a href="#cb8-472" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-473"><a href="#cb8-473" aria-hidden="true" tabindex="-1"></a>plot</span>
+<span id="cb8-474"><a href="#cb8-474" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-475"><a href="#cb8-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-476"><a href="#cb8-476" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Apply font family changes to the primary font in <span class="in">`theme(...)`</span></span>
+<span id="cb8-477"><a href="#cb8-477" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Use <span class="in">`mizani`</span> to customize axis breaks and labels to show <span class="in">`year`</span></span>
+<span id="cb8-478"><a href="#cb8-478" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Add <span class="in">`title`</span>, <span class="in">`subtitle`</span> and wrap long lines with the help of <span class="in">`textwrap`</span></span>
+<span id="cb8-479"><a href="#cb8-479" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-480"><a href="#cb8-480" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusion of the base graphic</span></span>
 <span id="cb8-481"><a href="#cb8-481" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-482"><a href="#cb8-482" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusion of the base graphic</span></span>
-<span id="cb8-483"><a href="#cb8-483" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-484"><a href="#cb8-484" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-487"><a href="#cb8-487" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-488"><a href="#cb8-488" aria-hidden="true" tabindex="-1"></a><span class="co"># | include: false</span></span>
-<span id="cb8-489"><a href="#cb8-489" aria-hidden="true" tabindex="-1"></a>plot.save(<span class="st">"2025-plotnine-submission.png"</span>)</span>
-<span id="cb8-490"><a href="#cb8-490" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-482"><a href="#cb8-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-485"><a href="#cb8-485" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-486"><a href="#cb8-486" aria-hidden="true" tabindex="-1"></a><span class="co"># | include: false</span></span>
+<span id="cb8-487"><a href="#cb8-487" aria-hidden="true" tabindex="-1"></a>plot.save(<span class="st">"2025-plotnine-submission.png"</span>)</span>
+<span id="cb8-488"><a href="#cb8-488" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-489"><a href="#cb8-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-490"><a href="#cb8-490" aria-hidden="true" tabindex="-1"></a>And that concludes generating the employment heatmap.</span>
 <span id="cb8-491"><a href="#cb8-491" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-492"><a href="#cb8-492" aria-hidden="true" tabindex="-1"></a>And that concludes generating the employment heatmap.</span>
+<span id="cb8-492"><a href="#cb8-492" aria-hidden="true" tabindex="-1"></a>At the beginning, I wanted to stop here. However, I found the visualization sparks more questions. </span>
 <span id="cb8-493"><a href="#cb8-493" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-494"><a href="#cb8-494" aria-hidden="true" tabindex="-1"></a>At the beginning, I wanted to stop here. However, I found the visualization sparks more questions. </span>
+<span id="cb8-494"><a href="#cb8-494" aria-hidden="true" tabindex="-1"></a>Although the graphic clearly shows contractions and growth over time, it lacks details that I think are critical for meaningful interpretation:</span>
 <span id="cb8-495"><a href="#cb8-495" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-496"><a href="#cb8-496" aria-hidden="true" tabindex="-1"></a>Although the graphic clearly shows contractions and growth over time, it lacks details that I think are critical for meaningful interpretation:</span>
+<span id="cb8-496"><a href="#cb8-496" aria-hidden="true" tabindex="-1"></a>What are the specific industries that are growing and shrinking? And by how much?</span>
 <span id="cb8-497"><a href="#cb8-497" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-498"><a href="#cb8-498" aria-hidden="true" tabindex="-1"></a>What are the specific industries that are growing and shrinking? And by how much?</span>
+<span id="cb8-498"><a href="#cb8-498" aria-hidden="true" tabindex="-1"></a><span class="fu"># Adding more layers</span></span>
 <span id="cb8-499"><a href="#cb8-499" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-500"><a href="#cb8-500" aria-hidden="true" tabindex="-1"></a><span class="fu"># Adding more layers</span></span>
+<span id="cb8-500"><a href="#cb8-500" aria-hidden="true" tabindex="-1"></a>It will be a challenge to display even more information into an already information-dense visualization. But let's see what we can do.</span>
 <span id="cb8-501"><a href="#cb8-501" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-502"><a href="#cb8-502" aria-hidden="true" tabindex="-1"></a>It will be a challenge to display even more information into an already information-dense visualization. But let's see what we can do.</span>
+<span id="cb8-502"><a href="#cb8-502" aria-hidden="true" tabindex="-1"></a>We're going to take advantage of the <span class="in">`layering`</span> capabilities in <span class="in">`plotnine`</span> and add industry-specific information ont op.</span>
 <span id="cb8-503"><a href="#cb8-503" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-504"><a href="#cb8-504" aria-hidden="true" tabindex="-1"></a>We're going to take advantage of the <span class="in">`layering`</span> capabilities in <span class="in">`plotnine`</span> and add industry-specific information ont op.</span>
+<span id="cb8-504"><a href="#cb8-504" aria-hidden="true" tabindex="-1"></a><span class="fu">## Highlighting an Industry</span></span>
 <span id="cb8-505"><a href="#cb8-505" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-506"><a href="#cb8-506" aria-hidden="true" tabindex="-1"></a><span class="fu">## Highlighting an Industry</span></span>
-<span id="cb8-507"><a href="#cb8-507" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-510"><a href="#cb8-510" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-511"><a href="#cb8-511" aria-hidden="true" tabindex="-1"></a>INDUSTRY <span class="op">=</span> <span class="st">"Wholesale and retail trade [41, 44-45]"</span>  <span class="co">#  &lt;1&gt;</span></span>
-<span id="cb8-512"><a href="#cb8-512" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-513"><a href="#cb8-513" aria-hidden="true" tabindex="-1"></a>plot_data_subsetted <span class="op">=</span> labour_processed_cutted.<span class="bu">filter</span>(  <span class="co">#  &lt;2&gt;</span></span>
-<span id="cb8-514"><a href="#cb8-514" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>],</span>
-<span id="cb8-515"><a href="#cb8-515" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>],</span>
-<span id="cb8-516"><a href="#cb8-516" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Industry"</span>) <span class="op">==</span> INDUSTRY,</span>
-<span id="cb8-517"><a href="#cb8-517" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-518"><a href="#cb8-518" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-519"><a href="#cb8-519" aria-hidden="true" tabindex="-1"></a>plot_highlight_industry <span class="op">=</span> (</span>
-<span id="cb8-520"><a href="#cb8-520" aria-hidden="true" tabindex="-1"></a>    plot</span>
-<span id="cb8-521"><a href="#cb8-521" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(data<span class="op">=</span>plot_data_subsetted, color<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="st">"black"</span>)  <span class="co">#  &lt;3&gt;</span></span>
-<span id="cb8-522"><a href="#cb8-522" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span>INDUSTRY, subtitle<span class="op">=</span><span class="st">""</span>)</span>
-<span id="cb8-523"><a href="#cb8-523" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-524"><a href="#cb8-524" aria-hidden="true" tabindex="-1"></a>plot_highlight_industry</span>
-<span id="cb8-525"><a href="#cb8-525" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb8-526"><a href="#cb8-526" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-527"><a href="#cb8-527" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Specify the target industry to highlight</span>
-<span id="cb8-528"><a href="#cb8-528" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Filter data to the selected industry and time range</span>
-<span id="cb8-529"><a href="#cb8-529" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Layer the filtered data as black points over the existing heatmap with <span class="in">`geom_point`</span> </span>
+<span id="cb8-508"><a href="#cb8-508" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-509"><a href="#cb8-509" aria-hidden="true" tabindex="-1"></a>INDUSTRY <span class="op">=</span> <span class="st">"Wholesale and retail trade [41, 44-45]"</span>  <span class="co">#  &lt;1&gt;</span></span>
+<span id="cb8-510"><a href="#cb8-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-511"><a href="#cb8-511" aria-hidden="true" tabindex="-1"></a>plot_data_subsetted <span class="op">=</span> labour_processed_cutted.<span class="bu">filter</span>(  <span class="co">#  &lt;2&gt;</span></span>
+<span id="cb8-512"><a href="#cb8-512" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>],</span>
+<span id="cb8-513"><a href="#cb8-513" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>],</span>
+<span id="cb8-514"><a href="#cb8-514" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Industry"</span>) <span class="op">==</span> INDUSTRY,</span>
+<span id="cb8-515"><a href="#cb8-515" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-516"><a href="#cb8-516" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-517"><a href="#cb8-517" aria-hidden="true" tabindex="-1"></a>plot_highlight_industry <span class="op">=</span> (</span>
+<span id="cb8-518"><a href="#cb8-518" aria-hidden="true" tabindex="-1"></a>    plot</span>
+<span id="cb8-519"><a href="#cb8-519" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(data<span class="op">=</span>plot_data_subsetted, color<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="st">"black"</span>)  <span class="co">#  &lt;3&gt;</span></span>
+<span id="cb8-520"><a href="#cb8-520" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span>INDUSTRY, subtitle<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb8-521"><a href="#cb8-521" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-522"><a href="#cb8-522" aria-hidden="true" tabindex="-1"></a>plot_highlight_industry</span>
+<span id="cb8-523"><a href="#cb8-523" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-524"><a href="#cb8-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-525"><a href="#cb8-525" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Specify the target industry to highlight</span>
+<span id="cb8-526"><a href="#cb8-526" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Filter data to the selected industry and time range</span>
+<span id="cb8-527"><a href="#cb8-527" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Layer the filtered data as black points over the existing heatmap with <span class="in">`geom_point`</span> </span>
+<span id="cb8-528"><a href="#cb8-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-529"><a href="#cb8-529" aria-hidden="true" tabindex="-1"></a>This approach allows us to trace specific industry trends in the context of the broader employment dynamics.</span>
 <span id="cb8-530"><a href="#cb8-530" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-531"><a href="#cb8-531" aria-hidden="true" tabindex="-1"></a>This approach allows us to trace specific industry trends in the context of the broader employment dynamics.</span>
+<span id="cb8-531"><a href="#cb8-531" aria-hidden="true" tabindex="-1"></a><span class="fu">## Adding statistics to the plot</span></span>
 <span id="cb8-532"><a href="#cb8-532" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-533"><a href="#cb8-533" aria-hidden="true" tabindex="-1"></a><span class="fu">## Adding statistics to the plot</span></span>
+<span id="cb8-533"><a href="#cb8-533" aria-hidden="true" tabindex="-1"></a>I think adding a few key statistics to the graphic will leave a more impactful impression on readers.</span>
 <span id="cb8-534"><a href="#cb8-534" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-535"><a href="#cb8-535" aria-hidden="true" tabindex="-1"></a>I think adding a few key statistics to the graphic will leave a more impactful impression on readers.</span>
+<span id="cb8-535"><a href="#cb8-535" aria-hidden="true" tabindex="-1"></a>In this section I compute the change, and % change for the last: </span>
 <span id="cb8-536"><a href="#cb8-536" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-537"><a href="#cb8-537" aria-hidden="true" tabindex="-1"></a>In this section I compute the change, and % change for the last: </span>
-<span id="cb8-538"><a href="#cb8-538" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-539"><a href="#cb8-539" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1 month </span>
-<span id="cb8-540"><a href="#cb8-540" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>5 months</span>
-<span id="cb8-541"><a href="#cb8-541" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1 year</span>
-<span id="cb8-542"><a href="#cb8-542" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>5 years</span>
-<span id="cb8-543"><a href="#cb8-543" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-546"><a href="#cb8-546" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-547"><a href="#cb8-547" aria-hidden="true" tabindex="-1"></a><span class="co"># Define offsets</span></span>
-<span id="cb8-548"><a href="#cb8-548" aria-hidden="true" tabindex="-1"></a>offsets <span class="op">=</span> {</span>
-<span id="cb8-549"><a href="#cb8-549" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1M"</span>: <span class="dv">1</span>,</span>
-<span id="cb8-550"><a href="#cb8-550" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5M"</span>: <span class="dv">5</span>,</span>
-<span id="cb8-551"><a href="#cb8-551" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1Y"</span>: <span class="dv">12</span>,</span>
-<span id="cb8-552"><a href="#cb8-552" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5Y"</span>: <span class="dv">60</span>,</span>
-<span id="cb8-553"><a href="#cb8-553" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-554"><a href="#cb8-554" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-555"><a href="#cb8-555" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by industry + date</span></span>
-<span id="cb8-556"><a href="#cb8-556" aria-hidden="true" tabindex="-1"></a>labour_offset <span class="op">=</span> labour_processed_cutted</span>
-<span id="cb8-557"><a href="#cb8-557" aria-hidden="true" tabindex="-1"></a>labour_offset <span class="op">=</span> labour_offset.sort([<span class="st">"Industry"</span>, <span class="st">"DATE_YMD"</span>])</span>
-<span id="cb8-558"><a href="#cb8-558" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-559"><a href="#cb8-559" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute diffs and %diffs for each horizon</span></span>
-<span id="cb8-560"><a href="#cb8-560" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, months <span class="kw">in</span> offsets.items():</span>
-<span id="cb8-561"><a href="#cb8-561" aria-hidden="true" tabindex="-1"></a>    labour_offset <span class="op">=</span> labour_offset.with_columns(</span>
-<span id="cb8-562"><a href="#cb8-562" aria-hidden="true" tabindex="-1"></a>        [</span>
-<span id="cb8-563"><a href="#cb8-563" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"DATE_YMD"</span>).shift(months).alias(<span class="ss">f"DATE_YMD_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>)),</span>
-<span id="cb8-564"><a href="#cb8-564" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>).alias(<span class="ss">f"VALUE_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>)),</span>
-<span id="cb8-565"><a href="#cb8-565" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"VALUE"</span>) <span class="op">-</span> pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>)).alias(</span>
-<span id="cb8-566"><a href="#cb8-566" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"DIFF_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb8-567"><a href="#cb8-567" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb8-568"><a href="#cb8-568" aria-hidden="true" tabindex="-1"></a>            (</span>
-<span id="cb8-569"><a href="#cb8-569" aria-hidden="true" tabindex="-1"></a>                (pl.col(<span class="st">"VALUE"</span>) <span class="op">-</span> pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>))</span>
-<span id="cb8-570"><a href="#cb8-570" aria-hidden="true" tabindex="-1"></a>                <span class="op">/</span> pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>)</span>
-<span id="cb8-571"><a href="#cb8-571" aria-hidden="true" tabindex="-1"></a>                <span class="op">*</span> <span class="dv">100</span></span>
-<span id="cb8-572"><a href="#cb8-572" aria-hidden="true" tabindex="-1"></a>            ).alias(<span class="ss">f"PDIFF_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>),</span>
-<span id="cb8-573"><a href="#cb8-573" aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb8-574"><a href="#cb8-574" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-575"><a href="#cb8-575" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-576"><a href="#cb8-576" aria-hidden="true" tabindex="-1"></a><span class="co"># convert to dictionary for easier access</span></span>
-<span id="cb8-577"><a href="#cb8-577" aria-hidden="true" tabindex="-1"></a>stats <span class="op">=</span> labour_offset.<span class="bu">filter</span>(</span>
-<span id="cb8-578"><a href="#cb8-578" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Industry"</span>) <span class="op">==</span> INDUSTRY, pl.col(<span class="st">"DATE_YMD"</span>) <span class="op">==</span> pl.col(<span class="st">"DATE_YMD"</span>).<span class="bu">max</span>()</span>
-<span id="cb8-579"><a href="#cb8-579" aria-hidden="true" tabindex="-1"></a>).to_dicts()[<span class="dv">0</span>]</span>
-<span id="cb8-580"><a href="#cb8-580" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-581"><a href="#cb8-581" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a string that we can use as a subtitle</span></span>
-<span id="cb8-582"><a href="#cb8-582" aria-hidden="true" tabindex="-1"></a>periods <span class="op">=</span> [</span>
-<span id="cb8-583"><a href="#cb8-583" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_1M'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_1M"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 1 Month"</span>,</span>
-<span id="cb8-584"><a href="#cb8-584" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_5M'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_5M"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 5 Months"</span>,</span>
-<span id="cb8-585"><a href="#cb8-585" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_1Y'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_1Y"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 1 Year"</span>,</span>
-<span id="cb8-586"><a href="#cb8-586" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_5Y'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_5Y"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 5 Years"</span>,</span>
-<span id="cb8-587"><a href="#cb8-587" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb8-588"><a href="#cb8-588" aria-hidden="true" tabindex="-1"></a>subtitle_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(periods)</span>
-<span id="cb8-589"><a href="#cb8-589" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-537"><a href="#cb8-537" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1 month </span>
+<span id="cb8-538"><a href="#cb8-538" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>5 months</span>
+<span id="cb8-539"><a href="#cb8-539" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1 year</span>
+<span id="cb8-540"><a href="#cb8-540" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>5 years</span>
+<span id="cb8-541"><a href="#cb8-541" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-544"><a href="#cb8-544" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-545"><a href="#cb8-545" aria-hidden="true" tabindex="-1"></a><span class="co"># Define offsets</span></span>
+<span id="cb8-546"><a href="#cb8-546" aria-hidden="true" tabindex="-1"></a>offsets <span class="op">=</span> {</span>
+<span id="cb8-547"><a href="#cb8-547" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1M"</span>: <span class="dv">1</span>,</span>
+<span id="cb8-548"><a href="#cb8-548" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5M"</span>: <span class="dv">5</span>,</span>
+<span id="cb8-549"><a href="#cb8-549" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1Y"</span>: <span class="dv">12</span>,</span>
+<span id="cb8-550"><a href="#cb8-550" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5Y"</span>: <span class="dv">60</span>,</span>
+<span id="cb8-551"><a href="#cb8-551" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-552"><a href="#cb8-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-553"><a href="#cb8-553" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by industry + date</span></span>
+<span id="cb8-554"><a href="#cb8-554" aria-hidden="true" tabindex="-1"></a>labour_offset <span class="op">=</span> labour_processed_cutted</span>
+<span id="cb8-555"><a href="#cb8-555" aria-hidden="true" tabindex="-1"></a>labour_offset <span class="op">=</span> labour_offset.sort([<span class="st">"Industry"</span>, <span class="st">"DATE_YMD"</span>])</span>
+<span id="cb8-556"><a href="#cb8-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-557"><a href="#cb8-557" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute diffs and %diffs for each horizon</span></span>
+<span id="cb8-558"><a href="#cb8-558" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, months <span class="kw">in</span> offsets.items():</span>
+<span id="cb8-559"><a href="#cb8-559" aria-hidden="true" tabindex="-1"></a>    labour_offset <span class="op">=</span> labour_offset.with_columns(</span>
+<span id="cb8-560"><a href="#cb8-560" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb8-561"><a href="#cb8-561" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"DATE_YMD"</span>).shift(months).alias(<span class="ss">f"DATE_YMD_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>)),</span>
+<span id="cb8-562"><a href="#cb8-562" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>).alias(<span class="ss">f"VALUE_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>)),</span>
+<span id="cb8-563"><a href="#cb8-563" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"VALUE"</span>) <span class="op">-</span> pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>)).alias(</span>
+<span id="cb8-564"><a href="#cb8-564" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"DIFF_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb8-565"><a href="#cb8-565" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb8-566"><a href="#cb8-566" aria-hidden="true" tabindex="-1"></a>            (</span>
+<span id="cb8-567"><a href="#cb8-567" aria-hidden="true" tabindex="-1"></a>                (pl.col(<span class="st">"VALUE"</span>) <span class="op">-</span> pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>))</span>
+<span id="cb8-568"><a href="#cb8-568" aria-hidden="true" tabindex="-1"></a>                <span class="op">/</span> pl.col(<span class="st">"VALUE"</span>).shift(months).over(<span class="st">"Industry"</span>)</span>
+<span id="cb8-569"><a href="#cb8-569" aria-hidden="true" tabindex="-1"></a>                <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb8-570"><a href="#cb8-570" aria-hidden="true" tabindex="-1"></a>            ).alias(<span class="ss">f"PDIFF_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>),</span>
+<span id="cb8-571"><a href="#cb8-571" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb8-572"><a href="#cb8-572" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-573"><a href="#cb8-573" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-574"><a href="#cb8-574" aria-hidden="true" tabindex="-1"></a><span class="co"># convert to dictionary for easier access</span></span>
+<span id="cb8-575"><a href="#cb8-575" aria-hidden="true" tabindex="-1"></a>stats <span class="op">=</span> labour_offset.<span class="bu">filter</span>(</span>
+<span id="cb8-576"><a href="#cb8-576" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Industry"</span>) <span class="op">==</span> INDUSTRY, pl.col(<span class="st">"DATE_YMD"</span>) <span class="op">==</span> pl.col(<span class="st">"DATE_YMD"</span>).<span class="bu">max</span>()</span>
+<span id="cb8-577"><a href="#cb8-577" aria-hidden="true" tabindex="-1"></a>).to_dicts()[<span class="dv">0</span>]</span>
+<span id="cb8-578"><a href="#cb8-578" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-579"><a href="#cb8-579" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a string that we can use as a subtitle</span></span>
+<span id="cb8-580"><a href="#cb8-580" aria-hidden="true" tabindex="-1"></a>periods <span class="op">=</span> [</span>
+<span id="cb8-581"><a href="#cb8-581" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_1M'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_1M"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 1 Month"</span>,</span>
+<span id="cb8-582"><a href="#cb8-582" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_5M'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_5M"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 5 Months"</span>,</span>
+<span id="cb8-583"><a href="#cb8-583" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_1Y'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_1Y"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 1 Year"</span>,</span>
+<span id="cb8-584"><a href="#cb8-584" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>stats[<span class="st">'DIFF_5Y'</span>]<span class="sc">:&lt;+4.0f}</span><span class="ss"> </span><span class="sc">{</span><span class="ss">f'(</span><span class="sc">{</span>stats[<span class="st">"PDIFF_5Y"</span>]<span class="sc">:+.2f}</span><span class="ss">%)'</span><span class="sc">:&lt;10}</span><span class="ss"> 5 Years"</span>,</span>
+<span id="cb8-585"><a href="#cb8-585" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-586"><a href="#cb8-586" aria-hidden="true" tabindex="-1"></a>subtitle_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(periods)</span>
+<span id="cb8-587"><a href="#cb8-587" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-588"><a href="#cb8-588" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-589"><a href="#cb8-589" aria-hidden="true" tabindex="-1"></a>The plan is to add these into the plot as a subtitle. I would love to additionally set green and red colors to positive and negative values, but that isn't currently possible in <span class="in">`plotnine`</span>. However, <span class="co">[</span><span class="ot">#612</span><span class="co">](https://github.com/has2k1/plotnine/issues/612)</span> suggests this may be possible in the longer term.</span>
 <span id="cb8-590"><a href="#cb8-590" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-591"><a href="#cb8-591" aria-hidden="true" tabindex="-1"></a>The plan is to add these into the plot as a subtitle. I would love to additionally set green and red colors to positive and negative values, but that isn't currently possible in <span class="in">`plotnine`</span>. However, <span class="co">[</span><span class="ot">#612</span><span class="co">](https://github.com/has2k1/plotnine/issues/612)</span> suggests this may be possible in the longer term.</span>
-<span id="cb8-592"><a href="#cb8-592" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-595"><a href="#cb8-595" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb8-596"><a href="#cb8-596" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb8-597"><a href="#cb8-597" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-598"><a href="#cb8-598" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-599"><a href="#cb8-599" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
-<span id="cb8-600"><a href="#cb8-600" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
-<span id="cb8-601"><a href="#cb8-601" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
-<span id="cb8-602"><a href="#cb8-602" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-603"><a href="#cb8-603" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>),</span>
-<span id="cb8-604"><a href="#cb8-604" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-605"><a href="#cb8-605" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>, height<span class="op">=</span><span class="fl">0.95</span>)</span>
-<span id="cb8-606"><a href="#cb8-606" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
-<span id="cb8-607"><a href="#cb8-607" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb8-608"><a href="#cb8-608" aria-hidden="true" tabindex="-1"></a>        text<span class="op">=</span>element_text(family<span class="op">=</span>FONT_PRIMARY),</span>
-<span id="cb8-609"><a href="#cb8-609" aria-hidden="true" tabindex="-1"></a>        figure_size<span class="op">=</span>FIGURE_THEME_SIZE,</span>
-<span id="cb8-610"><a href="#cb8-610" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),</span>
-<span id="cb8-611"><a href="#cb8-611" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),</span>
-<span id="cb8-612"><a href="#cb8-612" aria-hidden="true" tabindex="-1"></a>        axis_title_y<span class="op">=</span>element_text(weight<span class="op">=</span><span class="dv">300</span>),</span>
-<span id="cb8-613"><a href="#cb8-613" aria-hidden="true" tabindex="-1"></a>        legend_justification_right<span class="op">=</span><span class="dv">1</span>,</span>
-<span id="cb8-614"><a href="#cb8-614" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=</span><span class="st">"right"</span>,</span>
-<span id="cb8-615"><a href="#cb8-615" aria-hidden="true" tabindex="-1"></a>        legend_text_position<span class="op">=</span><span class="st">"right"</span>,</span>
-<span id="cb8-616"><a href="#cb8-616" aria-hidden="true" tabindex="-1"></a>        legend_title_position<span class="op">=</span><span class="st">"top"</span>,</span>
-<span id="cb8-617"><a href="#cb8-617" aria-hidden="true" tabindex="-1"></a>        legend_key_spacing<span class="op">=</span><span class="dv">0</span>,</span>
-<span id="cb8-618"><a href="#cb8-618" aria-hidden="true" tabindex="-1"></a>        legend_key_width<span class="op">=</span><span class="dv">15</span>,</span>
-<span id="cb8-619"><a href="#cb8-619" aria-hidden="true" tabindex="-1"></a>        legend_key_height<span class="op">=</span><span class="dv">15</span>,</span>
-<span id="cb8-620"><a href="#cb8-620" aria-hidden="true" tabindex="-1"></a>        legend_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">8</span>, family<span class="op">=</span>FONT_SECONDARY),</span>
-<span id="cb8-621"><a href="#cb8-621" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
-<span id="cb8-622"><a href="#cb8-622" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>),</span>
-<span id="cb8-623"><a href="#cb8-623" aria-hidden="true" tabindex="-1"></a>        plot_subtitle<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>, margin<span class="op">=</span>{<span class="st">"b"</span>: <span class="dv">1</span>, <span class="st">"units"</span>: <span class="st">"lines"</span>}),</span>
-<span id="cb8-624"><a href="#cb8-624" aria-hidden="true" tabindex="-1"></a>        plot_background<span class="op">=</span>element_rect(fill<span class="op">=</span>COLOR_BACKGROUND, color<span class="op">=</span>COLOR_BACKGROUND),</span>
-<span id="cb8-625"><a href="#cb8-625" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-626"><a href="#cb8-626" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order, labels<span class="op">=</span>legend_labels)</span>
-<span id="cb8-627"><a href="#cb8-627" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> guides(fill<span class="op">=</span>guide_legend(ncol<span class="op">=</span><span class="dv">1</span>, reverse<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb8-628"><a href="#cb8-628" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_datetime(</span>
-<span id="cb8-629"><a href="#cb8-629" aria-hidden="true" tabindex="-1"></a>        labels<span class="op">=</span>ml.label_date(<span class="st">"%Y"</span>),</span>
-<span id="cb8-630"><a href="#cb8-630" aria-hidden="true" tabindex="-1"></a>        expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
-<span id="cb8-631"><a href="#cb8-631" aria-hidden="true" tabindex="-1"></a>        breaks<span class="op">=</span>mb.breaks_date_width(<span class="st">"1 years"</span>),</span>
-<span id="cb8-632"><a href="#cb8-632" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-633"><a href="#cb8-633" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(</span>
-<span id="cb8-634"><a href="#cb8-634" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span>re.sub(<span class="vs">r" </span><span class="ch">\[</span><span class="dv">.</span><span class="op">*?</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, <span class="st">""</span>, INDUSTRY),  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb8-635"><a href="#cb8-635" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span>subtitle_text,  <span class="co"># &lt;2&gt;</span></span>
-<span id="cb8-636"><a href="#cb8-636" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">""</span>,</span>
-<span id="cb8-637"><a href="#cb8-637" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"&lt; SECTORS FALLING            SECTORS RISING &gt;"</span>,</span>
-<span id="cb8-638"><a href="#cb8-638" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-639"><a href="#cb8-639" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(data<span class="op">=</span>plot_data_subsetted, color<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb8-640"><a href="#cb8-640" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-641"><a href="#cb8-641" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb8-642"><a href="#cb8-642" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-643"><a href="#cb8-643" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Use inline regex to remove the trailing special characters</span>
-<span id="cb8-644"><a href="#cb8-644" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>add <span class="in">`subtitle_text`</span> to <span class="in">`labs`</span></span>
+<span id="cb8-593"><a href="#cb8-593" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-594"><a href="#cb8-594" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb8-595"><a href="#cb8-595" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-596"><a href="#cb8-596" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-597"><a href="#cb8-597" aria-hidden="true" tabindex="-1"></a>    ggplot(</span>
+<span id="cb8-598"><a href="#cb8-598" aria-hidden="true" tabindex="-1"></a>        labour_processed_cutted.<span class="bu">filter</span>(</span>
+<span id="cb8-599"><a href="#cb8-599" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"YEAR"</span>) <span class="op">&gt;=</span> FILTER_YEAR[<span class="dv">0</span>], pl.col(<span class="st">"YEAR"</span>) <span class="op">&lt;=</span> FILTER_YEAR[<span class="dv">1</span>]</span>
+<span id="cb8-600"><a href="#cb8-600" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb8-601"><a href="#cb8-601" aria-hidden="true" tabindex="-1"></a>        aes(x<span class="op">=</span><span class="st">"DATE_YMD"</span>, y<span class="op">=</span><span class="st">"centered_rank_across_industry"</span>, fill<span class="op">=</span><span class="st">"PDIFF_BINNED"</span>),</span>
+<span id="cb8-602"><a href="#cb8-602" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-603"><a href="#cb8-603" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_tile(color<span class="op">=</span><span class="st">"white"</span>, height<span class="op">=</span><span class="fl">0.95</span>)</span>
+<span id="cb8-604"><a href="#cb8-604" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_tufte()</span>
+<span id="cb8-605"><a href="#cb8-605" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
+<span id="cb8-606"><a href="#cb8-606" aria-hidden="true" tabindex="-1"></a>        text<span class="op">=</span>element_text(family<span class="op">=</span>FONT_PRIMARY),</span>
+<span id="cb8-607"><a href="#cb8-607" aria-hidden="true" tabindex="-1"></a>        figure_size<span class="op">=</span>FIGURE_THEME_SIZE,</span>
+<span id="cb8-608"><a href="#cb8-608" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),</span>
+<span id="cb8-609"><a href="#cb8-609" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(family<span class="op">=</span>FONT_SECONDARY),</span>
+<span id="cb8-610"><a href="#cb8-610" aria-hidden="true" tabindex="-1"></a>        axis_title_y<span class="op">=</span>element_text(weight<span class="op">=</span><span class="dv">300</span>),</span>
+<span id="cb8-611"><a href="#cb8-611" aria-hidden="true" tabindex="-1"></a>        legend_justification_right<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb8-612"><a href="#cb8-612" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=</span><span class="st">"right"</span>,</span>
+<span id="cb8-613"><a href="#cb8-613" aria-hidden="true" tabindex="-1"></a>        legend_text_position<span class="op">=</span><span class="st">"right"</span>,</span>
+<span id="cb8-614"><a href="#cb8-614" aria-hidden="true" tabindex="-1"></a>        legend_title_position<span class="op">=</span><span class="st">"top"</span>,</span>
+<span id="cb8-615"><a href="#cb8-615" aria-hidden="true" tabindex="-1"></a>        legend_key_spacing<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb8-616"><a href="#cb8-616" aria-hidden="true" tabindex="-1"></a>        legend_key_width<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb8-617"><a href="#cb8-617" aria-hidden="true" tabindex="-1"></a>        legend_key_height<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb8-618"><a href="#cb8-618" aria-hidden="true" tabindex="-1"></a>        legend_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">8</span>, family<span class="op">=</span>FONT_SECONDARY),</span>
+<span id="cb8-619"><a href="#cb8-619" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
+<span id="cb8-620"><a href="#cb8-620" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>),</span>
+<span id="cb8-621"><a href="#cb8-621" aria-hidden="true" tabindex="-1"></a>        plot_subtitle<span class="op">=</span>element_text(ha<span class="op">=</span><span class="st">"left"</span>, margin<span class="op">=</span>{<span class="st">"b"</span>: <span class="dv">1</span>, <span class="st">"units"</span>: <span class="st">"lines"</span>}),</span>
+<span id="cb8-622"><a href="#cb8-622" aria-hidden="true" tabindex="-1"></a>        plot_background<span class="op">=</span>element_rect(fill<span class="op">=</span>COLOR_BACKGROUND, color<span class="op">=</span>COLOR_BACKGROUND),</span>
+<span id="cb8-623"><a href="#cb8-623" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-624"><a href="#cb8-624" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_fill_manual(values<span class="op">=</span>color_mapping, breaks<span class="op">=</span>order, labels<span class="op">=</span>legend_labels)</span>
+<span id="cb8-625"><a href="#cb8-625" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> guides(fill<span class="op">=</span>guide_legend(ncol<span class="op">=</span><span class="dv">1</span>, reverse<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb8-626"><a href="#cb8-626" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_datetime(</span>
+<span id="cb8-627"><a href="#cb8-627" aria-hidden="true" tabindex="-1"></a>        labels<span class="op">=</span>ml.label_date(<span class="st">"%Y"</span>),</span>
+<span id="cb8-628"><a href="#cb8-628" aria-hidden="true" tabindex="-1"></a>        expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb8-629"><a href="#cb8-629" aria-hidden="true" tabindex="-1"></a>        breaks<span class="op">=</span>mb.breaks_date_width(<span class="st">"1 years"</span>),</span>
+<span id="cb8-630"><a href="#cb8-630" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-631"><a href="#cb8-631" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(</span>
+<span id="cb8-632"><a href="#cb8-632" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span>re.sub(<span class="vs">r" </span><span class="ch">\[</span><span class="dv">.</span><span class="op">*?</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, <span class="st">""</span>, INDUSTRY),  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-633"><a href="#cb8-633" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span>subtitle_text,  <span class="co"># &lt;2&gt;</span></span>
+<span id="cb8-634"><a href="#cb8-634" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">""</span>,</span>
+<span id="cb8-635"><a href="#cb8-635" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"&lt; SECTORS FALLING            SECTORS RISING &gt;"</span>,</span>
+<span id="cb8-636"><a href="#cb8-636" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-637"><a href="#cb8-637" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(data<span class="op">=</span>plot_data_subsetted, color<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb8-638"><a href="#cb8-638" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-639"><a href="#cb8-639" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-640"><a href="#cb8-640" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-641"><a href="#cb8-641" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Use inline regex to remove the trailing special characters</span>
+<span id="cb8-642"><a href="#cb8-642" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>add <span class="in">`subtitle_text`</span> to <span class="in">`labs`</span></span>
+<span id="cb8-643"><a href="#cb8-643" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-644"><a href="#cb8-644" aria-hidden="true" tabindex="-1"></a><span class="fu"># Conclusion</span></span>
+<span id="cb8-645"><a href="#cb8-645" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-646"><a href="#cb8-646" aria-hidden="true" tabindex="-1"></a>That concludes the end of this tutorial. See the <span class="co">[</span><span class="ot">main page</span><span class="co">](index.qmd)</span> for the complete visualization with some interactivity to allow filtering through industry-specific trends.</span>
+<span id="cb8-647"><a href="#cb8-647" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-648"><a href="#cb8-648" aria-hidden="true" tabindex="-1"></a>Overall, plotnine is a fantastic addition to Python's data visualization universe. Although I found some differences and missing functionality compared to R's <span class="in">`ggplot2`</span>, I was still able to create a complex visualization with relative ease. And, plotnine is still in early days, so I expect improvements and fixes will be developed in future releases.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
