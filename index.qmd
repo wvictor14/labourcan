@@ -277,6 +277,7 @@ plot = (
 plot
 ```
 
+
 ```{python}
 # | output: asis
 ALL_INDUSTRIES = (
