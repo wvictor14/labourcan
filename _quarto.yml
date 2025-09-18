@@ -2,6 +2,7 @@ project:
   type: website
 
 website:
+  favicon: logo.svg
   navbar:
     search: false
     title: false
