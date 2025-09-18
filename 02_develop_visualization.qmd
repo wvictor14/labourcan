@@ -19,9 +19,7 @@ Plotnine is a python data visualization graphics, heavily inspired by [ggplot2](
 
 In this tutorial, I'll walk through the process of creating my plotnine 2025 contest submission: A visualization of that tracks employment across Canadian industries, ranked by their monthly percent change in employment. This visualization reveals which industries are expanding versus contracting in Canada's economic climate over time.
 
-See the final visualizations [here](index.html)
-
-![2025-plotnine-submission](2025-plotnine-submission.png)
+![](2025-plotnine-submission.png)
 
 # Setup 
 
