@@ -1,14 +1,10 @@
 
-# Canada Employment Tracker
+# 2025 Posit Plotnine Contest Submission
 
-## labourcan
+## Canada Employment Tracker
 
-<!-- badges: start -->
-<!-- badges: end -->
 
-`labourcan` creates the quarto website for the [Canada Employment Tracker](https://victoryuan.com/labourcan/03_labour_main.html), which hosts my [`plotnine`]() visualization for the 2025 plotnine contest.
-
-See the visualization here and a more details on the process here. 
+For the 2025 Posit Plotnine Contest, I used Quarto to create the [Canada Employment Tracker](https://victoryuan.com/labourcan/), which hosts my `plotnine` visualization. I also created a [tutorial](https://victoryuan.com/labourcan/02_develop_visualization.html) that walks through my process of creating the visualization.
 
 ## Render
 
