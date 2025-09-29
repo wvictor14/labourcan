@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://wvictor14.github.io/labourcan/index.html</loc>
-    <lastmod>2025-09-18T23:30:45.717Z</lastmod>
-  </url>
-  <url>
     <loc>https://wvictor14.github.io/labourcan/01_develop_data_processing.html</loc>
-    <lastmod>2025-09-18T23:30:45.716Z</lastmod>
+    <lastmod>2025-09-29T23:29:29.066Z</lastmod>
   </url>
   <url>
-    <loc>https://wvictor14.github.io/labourcan/02_develop_visualization.html</loc>
-    <lastmod>2025-09-18T23:30:45.716Z</lastmod>
+    <loc>https://wvictor14.github.io/labourcan/index.html</loc>
+    <lastmod>2025-09-29T23:29:29.068Z</lastmod>
   </url>
   <url>
     <loc>https://wvictor14.github.io/labourcan/03_things_that_didnt_work.html</loc>
-    <lastmod>2025-09-18T23:30:45.716Z</lastmod>
+    <lastmod>2025-09-29T23:29:29.066Z</lastmod>
+  </url>
+  <url>
+    <loc>https://wvictor14.github.io/labourcan/02_develop_visualization.html</loc>
+    <lastmod>2025-09-29T23:29:29.066Z</lastmod>
   </url>
 </urlset>
