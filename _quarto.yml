@@ -8,7 +8,7 @@ website:
     title: false
     left:
       - href: index.qmd
-        text: "Canada Employment Tracker"
+        text: "Home"
       - sidebar:how
     tools:
       - icon: linkedin
