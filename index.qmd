@@ -1,5 +1,5 @@
 ---
-title: "Track Canada's Labour Statistics"
+title: "Tracking Canada's Labour Statistics with Plotnine"
 bibliography: references.bib
 csl: diabetologia.csl
 author: "Victor Yuan"
