@@ -240,12 +240,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1 class="hidden unlisted unnumbered">Setup</h1>
 <section id="parameters" class="level2">
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<div id="31e2342d" class="cell" data-execution_count="1">
+<div id="40748e2c" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyprojroot <span class="im">import</span> here</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mpl_fontkit <span class="im">as</span> fk</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> brand_yml <span class="im">import</span> Brand</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="b19d530c" class="cell" data-tags="[&quot;parameters&quot;]" data-execution_count="2">
+<div id="a070a70c" class="cell" data-tags="[&quot;parameters&quot;]" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>LABOUR_DATA_FILE <span class="op">=</span> here() <span class="op">/</span> <span class="st">"data"</span> <span class="op">/</span> <span class="st">"14100355.csv"</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>FIGURE_THEME_SIZE <span class="op">=</span> (<span class="dv">9</span>, <span class="dv">5</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>FILTER_YEAR <span class="op">=</span> (<span class="dv">2018</span>, <span class="dv">2025</span>)</span>
@@ -263,7 +263,7 @@ Font name: `Lato`</code></pre>
 </section>
 <section id="libraries" class="level2">
 <h2 class="anchored" data-anchor-id="libraries">Libraries</h2>
-<div id="85572cb7" class="cell" data-execution_count="3">
+<div id="e748b438" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> labourcan.data_processing <span class="im">import</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    read_labourcan,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    calculate_centered_rank,</span>
@@ -282,7 +282,7 @@ Font name: `Lato`</code></pre>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="d046f2a0" class="cell" data-execution_count="4">
+<div id="cdbdb146" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>labour <span class="op">=</span> read_labourcan(LABOUR_DATA_FILE)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove Aggregated Rows</span></span>
@@ -337,7 +337,7 @@ Font name: `Lato`</code></pre>
 <span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Stats</p>
-<div id="dfdb60b0" class="cell" data-execution_count="5">
+<div id="3637fc36" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_subtitle_for_industry(df, INDUSTRY):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define offsets</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    offsets <span class="op">=</span> {</span>
@@ -393,7 +393,7 @@ Font name: `Lato`</code></pre>
 <h1>Horizontal legend with horizontal legend text</h1>
 <p>Initially I wanted a horizontal legend for the colors. But in order to remove the whitespace between keys, I discovered that the text needs to be smaller than the legend keys, otherwise they “push” the legend keys apart in uneven manner. I attempted to (<em>unsuccesfully</em>) address this by making the legend text small, eliminating as much text as possible (e.g.&nbsp;removing the “%” characters for <code>-0.50</code> and <code>0.50</code>), and lastly increasing the legend key size.</p>
 <p>But it still didn’t really work out the way I hoped, so I stuck with a vertical legend instead.</p>
-<div id="8acf14a6" class="cell" data-execution_count="6">
+<div id="5aee0a6d" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -408,7 +408,7 @@ Font name: `Lato`</code></pre>
 <p>I wanted to add a line plot of employment numbers to the heatmap. Given the similar syntax in plotnine’s <a href="https://plotnine.org/guide/plot-composition.html">compose</a> to R’s <a href="https://patchwork.data-imaginist.com/">patchwork</a>, I thought the behaviour would be similar.</p>
 <p>One discrepancy is that there is no way to specify the relative size of component plots. But this might be addressed very soon <a href="https://github.com/has2k1/plotnine/pull/980">#980</a></p>
 <p>It is possible to (rather labourously) pad plots by using <code>plot_spacer</code>s, which I attemp unsuccessfully below:</p>
-<div id="b2cbae35" class="cell" data-execution_count="7">
+<div id="f6989419" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>INDUSTRY <span class="op">=</span> <span class="st">"Total employed, all industries"</span></span>
 <span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>plot_data_subsetted <span class="op">=</span> labour_processed_cutted.<span class="bu">filter</span>(pl.col(<span class="st">"Industry"</span>) <span class="op">==</span> INDUSTRY)</span>
 <span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -481,7 +481,7 @@ which will replace the existing scale.
 </div>
 <p>The x axes don’t automatically line up</p>
 <p>This can be fixed by ensuring <code>expand</code> and the <code>limits</code> is the same:</p>
-<div id="031da844" class="cell" data-execution_count="8">
+<div id="297b40c4" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Stack([plot_highlight_industry, line_plot]) <span class="op">&amp;</span> scale_x_datetime(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">&amp;</span> theme_bw() <span class="op">&amp;</span> theme(</span>
@@ -496,7 +496,7 @@ which will replace the existing scale.
 </div>
 </div>
 <p>But if we add <code>plot_spacer()</code>s then it won’t line up because it seems that the space that the legend occupies is now ignored:</p>
-<div id="0249972c" class="cell" data-execution_count="9">
+<div id="3ac1ab2d" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Stack([plot_highlight_industry, p1]) <span class="op">&amp;</span> scale_x_datetime(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">&amp;</span> theme_bw() <span class="op">&amp;</span> theme(</span>
